@@ -27,3 +27,4 @@ Third-party data bundled with the app keeps its own licence:
 - HSK word list : complete-hsk-vocabulary, MIT
 - Loanword list in indo.js : Wikipedia "List of Chinese loanwords in Indonesian", CC BY-SA 4.0
 - Example sentences in tatoeba.js : Tatoeba (https://tatoeba.org), CC BY 2.0 FR; each row keeps its sentence id
+- fonts/ : Source Serif 4 and Source Sans 3 (Adobe), SIL Open Font License 1.1

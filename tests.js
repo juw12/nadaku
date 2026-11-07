@@ -374,12 +374,16 @@
     const unvoiced = sample.filter((row) => !composedSentencePlan(row[0]));
     check("Tatoeba sentences get native audio chained from their words (300 sampled)", unvoiced.length === 0, unvoiced.slice(0, 3).map((r) => r[0]).join(" "));
 
+    const allRows = Object.values(TATOEBA).flat();
+    const noIndonesian = allRows.filter((row) => !row[2]);
+    const machineRows = allRows.filter((row) => row[6] === 1);
+    check("every example sentence has an Indonesian translation (human first, machine ones flagged)", noIndonesian.length === 0 && machineRows.length > 0 && machineRows.length < allRows.length, `${allRows.length - machineRows.length} human, ${machineRows.length} MT, ${noIndonesian.length} missing`);
     const keepLang = state.lang;
     state.lang = "id";
-    const englishOnly = Object.values(TATOEBA).flat().find((row) => !row[2]);
-    const idHtml = exampleTranslation(englishOnly);
+    const mtHtml = exampleTranslation(machineRows[0]);
+    const humanHtml = exampleTranslation(allRows.find((row) => row[2] && row[6] !== 1));
     state.lang = keepLang;
-    check("Indonesian UI marks English-only example translations with an EN pill", idHtml.includes(">EN<"), englishOnly[3]);
+    check("machine-translated Indonesian is labelled MT, human translations are not", mtHtml.includes(">MT<") && !humanHtml.includes(">MT<"), mtHtml.slice(0, 80));
   }
   {
     const expected = { "没": ["méi", ""], "吧": ["ba", ""], "行": ["xíng", ""], "雨": ["yǔ", "hujan"], "胖": ["pàng", "gemuk"], "重": ["zhòng", "berat"], "老公": ["lǎo gōng", "suami"] };
@@ -422,6 +426,30 @@
     const capped = state.toneLog.length === TONE_LOG_MAX && state.toneLog[TONE_LOG_MAX - 1][1] === "妈" && state.toneLog[TONE_LOG_MAX - 1][0] > 0;
     state.toneLog = keepLog;
     check(`tone practice log is capped at ${TONE_LOG_MAX} attempts (oldest dropped)`, capped, "");
+  }
+
+  {
+    // v6: professional UI, no emoji anywhere on screen
+    const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}\u{1F1E6}-\u{1F1FF}]/u;
+    const routes = ["home", "vocab", "tones/hear", "tones/speak", "write", "talk", "exam", "me", "stats", "indo"];
+    const keepHash = location.hash;
+    const withEmoji = [];
+    for (const r of routes) {
+      location.hash = r;
+      route();
+      const visible = document.getElementById("app").innerText;
+      const match = visible.match(EMOJI);
+      if (match) {
+        withEmoji.push(`${r}:${match[0]}`);
+      }
+    }
+    location.hash = keepHash;
+    check("no emoji on any of 10 screens (line icons only)", withEmoji.length === 0, withEmoji.join(" "));
+    const twoChar = BY_HANZI.get("促进");
+    const host = document.createElement("div");
+    host.innerHTML = wordCardHtml(twoChar);
+    const cells = host.querySelectorAll('.hanzi-big [class^="t"]');
+    check("word card draws one practice-grid cell per character", cells.length === 2 && host.querySelector(".hanzi-big").dataset.len === "2", cells.length);
   }
 
   state = JSON.parse(saved);

@@ -30,38 +30,38 @@ const STRINGS = {
     in7: "Tanpa review, 7 hari lagi tinggal", learned: "Dipelajari", due: "Perlu review", strong: "Kuat",
     week: "Aktivitas 7 hari", start: "Mulai", reviewNow: "Review sekarang", learnNew: "Pelajari 5 kata baru",
     reviewDesc: "kartu menunggu", newDesc: "audio penutur asli + contoh", toneDesc: "Dengar & ucapkan 4 nada",
-    talkDesc: "Roleplay — jalan offline", weakTone: "Nada terlemahmu", practice: "Latihan", next: "Lanjut",
+    talkDesc: "Roleplay, jalan offline", weakTone: "Nada terlemahmu", practice: "Latihan", next: "Lanjut",
     show: "Tunjukkan jawaban", again: "Lagi", hard: "Sulit", good: "Bisa", easy: "Mudah", done: "Selesai!",
-    backHome: "Kembali ke beranda", allWords: "Semua kata", notLearned: "baru", noDue: "Tidak ada review. Hebat! 🎉",
+    backHome: "Kembali ke beranda", allWords: "Semua kata", notLearned: "baru", noDue: "Tidak ada kata untuk diulang hari ini.", retake: "Ulangi ujian", back: "Kembali",
     listen: "Dengarkan", whichTone: "Nada berapa yang kamu dengar?", hint: "Petunjuk", correct: "Benar!",
     wrong: "Belum tepat", tone1: "Nada 1", tone2: "Nada 2", tone3: "Nada 3", tone4: "Nada 4",
     toneNames: ["", "datar tinggi", "naik", "turun-naik", "turun tajam"],
-    hearMode: "Dengar", speakMode: "Ucapkan", speakTip: "Tekan & tahan 🎤, ucapkan suku kata ini, lalu lepas. Analisis nada berjalan di perangkatmu (offline).",
-    hold: "Tahan untuk bicara", youSaidTone: "Nada yang terdeteksi", noVoice: "Suara tidak terdeteksi — coba lebih keras/dekat.",
+    hearMode: "Dengar", speakMode: "Ucapkan", speakTip: "Tekan dan tahan tombol mikrofon, ucapkan suku kata ini, lalu lepas. Analisis nada berjalan di perangkatmu (offline).",
+    hold: "Tahan untuk bicara", youSaidTone: "Nada yang terdeteksi", noVoice: "Suara tidak terdeteksi, coba lebih keras/dekat.",
     micBlocked: "Mikrofon tidak tersedia. Buka lewat start.bat atau situs https.",
     writeTip: "Tulis goresan sesuai urutan. Goresan yang benar akan terkunci.",
     watch: "Lihat urutan", trace: "Latih", recall: "Uji ingatan", strokes: "goresan", strokeOk: "Goresan benar",
-    strokeMiss: "Coba lagi — perhatikan arah & posisi", writeDone: "Karakter selesai",
-    talkTip: "Pilih jawaban, dan latih ucapan dengan 🎙 Tahan & tirukan — semuanya offline.",
+    strokeMiss: "Coba lagi, perhatikan arah & posisi", writeDone: "Karakter selesai",
+    talkTip: "Pilih jawaban, dan latih ucapan dengan Tahan & tirukan, semuanya offline.",
     youSaid: "Kamu bilang", speak: "Ucapkan", best: "Terbaik",
     examTip: "10 soal campuran: arti, hanzi, pinyin, nada, dan mendengar.", startExam: "Mulai ujian",
     result: "Hasil", addMissed: "Tambahkan kata yang salah ke review", added: "Ditambahkan ke review",
     settings: "Pengaturan", language: "Bahasa", level: "Level HSK", voice: "Audio", voiceOk: "Rekaman penutur asli (offline)",
     exportData: "Ekspor progres", importData: "Impor progres", reset: "Reset progres", resetConfirm: "Hapus semua progres?",
-    offline: "100% offline — progres tersimpan di perangkatmu.", meaningQ: "Apa arti kata ini?", hanziQ: "Pilih hanzi yang tepat",
+    offline: "100% offline, progres tersimpan di perangkatmu.", meaningQ: "Apa arti kata ini?", hanziQ: "Pilih hanzi yang tepat",
     pinyinQ: "Hanzi mana yang dibaca", listenQ: "Hanzi mana yang kamu dengar?", toneQ: "Nada berapa karakter ini?",
-    ofTen: "dari 10", readiness: "Kesiapan level", sessionNew: "Kata baru", quizTime: "Kuis cepat — pilih artinya",
-    xpEarned: "XP didapat", perfect: "Sempurna! 🏆", keepGoing: "Terus latihan! 💪", micNo: "Pengenalan suara tidak didukung di browser ini",
+    ofTen: "dari 10", readiness: "Kesiapan level", sessionNew: "Kata baru", quizTime: "Kuis cepat, pilih artinya",
+    xpEarned: "XP didapat", perfect: "Semua benar.", keepGoing: "Terus berlatih.", micNo: "Pengenalan suara tidak didukung di browser ini",
     listening: "Mendengarkan…", notHeard: "Tidak terdengar jelas, coba lagi", minutes: "m", hours: "j", days: "h",
     search: "Cari hanzi, pinyin, atau arti…", more: "Tampilkan lebih banyak", stats: "Statistik & kalibrasi",
     calibration: "Kalibrasi Meteran Memori", calibDesc: "Prediksi ingatan vs. hasil review sebenarnya. Garis diagonal = sempurna.",
     calibEmpty: "Butuh minimal 20 review untuk kalibrasi.", reviews: "review", predicted: "prediksi", actual: "aktual",
     studyData: "Ekspor data studi (CSV)", toneData: "Ekspor latihan nada (CSV)", chooseLevel: "Pilih level kamu", levelWords: "kata",
-    welcome: "Selamat datang di Nadaku", welcomeSub: "Belajar Mandarin dengan audio penutur asli, nada, dan urutan goresan — offline.",
+    welcome: "Selamat datang di Nadaku", welcomeSub: "Belajar Mandarin dengan audio penutur asli, nada, dan urutan goresan, offline.",
     keys: "Pintasan: Spasi = tunjukkan, 1–4 = nilai/pilih, R = putar ulang",
     noAudio: "Rekaman untuk kata ini belum terpasang (jalankan finish_audio.bat).",
-    shadowHold: "Tahan & tirukan", shadowMine: "Suaramu", shadowTip: "Dengarkan, lalu tahan 🎙 dan tirukan kalimatnya (offline).",
-    shadowGood: "Bagus — panjang ucapan pas", shadowShort: "Terlalu singkat — ucapkan seluruh kalimat", shadowLong: "Terlalu panjang — coba lebih lancar",
+    shadowHold: "Tahan & tirukan", shadowMine: "Suaramu", shadowTip: "Dengarkan, lalu tahan tombol rekam dan tirukan kalimatnya (offline).",
+    shadowGood: "Bagus, panjang ucapan pas", shadowShort: "Terlalu singkat, ucapkan seluruh kalimat", shadowLong: "Terlalu panjang, coba lebih lancar",
     onlineSpeech: "Pengenalan suara online (Chrome, butuh internet)",
     indoTitle: "Khusus lidah Indonesia", indoDesc: "Kata serapan Hokkien yang sudah kamu kenal + jebakan pinyin",
     loanTitle: "Kata yang sudah kamu tahu", loanDesc: "Kata-kata ini masuk ke bahasa Indonesia dari bahasa Hokkien. Di sebelahnya: kata Mandarin yang dipakai sekarang.",
@@ -80,38 +80,38 @@ const STRINGS = {
     in7: "Without review, in 7 days you'd keep", learned: "Learned", due: "Due", strong: "Strong",
     week: "Last 7 days", start: "Start", reviewNow: "Review now", learnNew: "Learn 5 new words",
     reviewDesc: "cards waiting", newDesc: "native audio + examples", toneDesc: "Hear & say the 4 tones",
-    talkDesc: "Roleplay — works offline", weakTone: "Your weakest tone", practice: "Practice", next: "Next",
+    talkDesc: "Roleplay, works offline", weakTone: "Your weakest tone", practice: "Practice", next: "Next",
     show: "Show answer", again: "Again", hard: "Hard", good: "Good", easy: "Easy", done: "Done!",
-    backHome: "Back to home", allWords: "All words", notLearned: "new", noDue: "Nothing due. Great job! 🎉",
+    backHome: "Back to home", allWords: "All words", notLearned: "new", noDue: "Nothing due today.", retake: "Retake exam", back: "Back",
     listen: "Listen", whichTone: "Which tone did you hear?", hint: "Hint", correct: "Correct!",
     wrong: "Not quite", tone1: "Tone 1", tone2: "Tone 2", tone3: "Tone 3", tone4: "Tone 4",
     toneNames: ["", "high flat", "rising", "dip", "falling"],
-    hearMode: "Hear", speakMode: "Speak", speakTip: "Press & hold 🎤, say this syllable, then release. Pitch analysis runs on your device (offline).",
-    hold: "Hold to speak", youSaidTone: "Detected tone", noVoice: "No voice detected — try louder/closer.",
+    hearMode: "Hear", speakMode: "Speak", speakTip: "Press and hold the mic button, say this syllable, then release. Pitch analysis runs on your device (offline).",
+    hold: "Hold to speak", youSaidTone: "Detected tone", noVoice: "No voice detected, try louder/closer.",
     micBlocked: "Microphone unavailable. Open via start.bat or an https site.",
     writeTip: "Write the strokes in order. Correct strokes lock in.",
     watch: "Watch order", trace: "Trace", recall: "Recall", strokes: "strokes", strokeOk: "Correct stroke",
-    strokeMiss: "Try again — check direction & position", writeDone: "Character complete",
-    talkTip: "Pick a reply and practise speaking with 🎙 Hold & repeat — all offline.",
+    strokeMiss: "Try again, check direction & position", writeDone: "Character complete",
+    talkTip: "Pick a reply and practise speaking with Hold & repeat, all offline.",
     youSaid: "You said", speak: "Speak", best: "Best",
     examTip: "10 mixed questions: meaning, hanzi, pinyin, tones and listening.", startExam: "Start exam",
     result: "Result", addMissed: "Add missed words to review", added: "Added to review",
     settings: "Settings", language: "Language", level: "HSK level", voice: "Audio", voiceOk: "Native-speaker recordings (offline)",
     exportData: "Export progress", importData: "Import progress", reset: "Reset progress", resetConfirm: "Delete all progress?",
-    offline: "100% offline — progress is stored on your device.", meaningQ: "What does this mean?", hanziQ: "Pick the right hanzi",
+    offline: "100% offline, progress is stored on your device.", meaningQ: "What does this mean?", hanziQ: "Pick the right hanzi",
     pinyinQ: "Which hanzi is read", listenQ: "Which hanzi did you hear?", toneQ: "What tone is this character?",
-    ofTen: "of 10", readiness: "Level readiness", sessionNew: "New word", quizTime: "Quick quiz — pick the meaning",
-    xpEarned: "XP earned", perfect: "Perfect! 🏆", keepGoing: "Keep practicing! 💪", micNo: "Speech recognition not supported in this browser",
+    ofTen: "of 10", readiness: "Level readiness", sessionNew: "New word", quizTime: "Quick quiz, pick the meaning",
+    xpEarned: "XP earned", perfect: "All correct.", keepGoing: "Keep practising.", micNo: "Speech recognition not supported in this browser",
     listening: "Listening…", notHeard: "Couldn't hear clearly, try again", minutes: "m", hours: "h", days: "d",
     search: "Search hanzi, pinyin or meaning…", more: "Show more", stats: "Stats & calibration",
     calibration: "Memory Meter calibration", calibDesc: "Predicted recall vs. actual review results. Diagonal = perfect.",
     calibEmpty: "Needs at least 20 reviews to calibrate.", reviews: "reviews", predicted: "predicted", actual: "actual",
     studyData: "Export study data (CSV)", toneData: "Export tone practice (CSV)", chooseLevel: "Choose your level", levelWords: "words",
-    welcome: "Welcome to Nadaku", welcomeSub: "Learn Mandarin with native audio, tones and stroke order — offline.",
+    welcome: "Welcome to Nadaku", welcomeSub: "Learn Mandarin with native audio, tones and stroke order, offline.",
     keys: "Shortcuts: Space = show, 1–4 = rate/choose, R = replay",
     noAudio: "Recording for this word is not installed yet (run finish_audio.bat).",
-    shadowHold: "Hold & repeat", shadowMine: "Your voice", shadowTip: "Listen, then hold 🎙 and repeat the line (offline).",
-    shadowGood: "Good — length matches", shadowShort: "Too short — say the whole line", shadowLong: "Too long — try more fluently",
+    shadowHold: "Hold & repeat", shadowMine: "Your voice", shadowTip: "Listen, then hold the record button and repeat the line (offline).",
+    shadowGood: "Good, length matches", shadowShort: "Too short, say the whole line", shadowLong: "Too long, try more fluently",
     onlineSpeech: "Online speech recognition (Chrome, needs internet)",
     indoTitle: "Made for Indonesian speakers", indoDesc: "Hokkien loanwords you already know + pinyin traps",
     loanTitle: "Words you already know", loanDesc: "These words came into Indonesian from Hokkien. Next to each: the Mandarin word used today.",
@@ -465,7 +465,7 @@ function earnedBadges() {
 
 function badgeLabel(id) {
   const [kind, n] = id.split("-");
-  return kind === "streak" ? `🔥 ${n} ${t("streak")}` : `📚 ${n} ${t("wordsBadge")}`;
+  return kind === "streak" ? `${n} ${t("streak")}` : `${n} ${t("wordsBadge")}`;
 }
 
 function newBadges() {
@@ -483,7 +483,7 @@ function reducedMotion() {
 function celebrate() {
   const fresh = newBadges();
   if (fresh.length) {
-    toast(`🏅 ${t("newBadge")} ${fresh.map(badgeLabel).join(" · ")}`);
+    toast(`${t("newBadge")} ${fresh.map(badgeLabel).join(" · ")}`);
   }
   if (reducedMotion() || !document.body) {
     return fresh;
@@ -962,27 +962,72 @@ function generateQuiz(count, rng = Math.random, level = state.level, withListeni
 
 // ---------- Router & shell ----------
 const TABS = [
-  ["home", "🏠"],
-  ["vocab", "📚"],
-  ["tones", "🎵"],
-  ["write", "✍️"],
-  ["talk", "💬"],
-  ["exam", "📝"],
+  ["home", "home"],
+  ["vocab", "book"],
+  ["tones", "tone"],
+  ["write", "pen"],
+  ["talk", "chat"],
+  ["exam", "exam"],
 ];
 
 const view = document.getElementById("view");
 let keyHandler = null;
 
+// ---------- Icons: one 24px line set (1.75 stroke), drawn for this app; no emoji anywhere in the UI ----------
+const ICON_PATHS = {
+  home: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+  book: "M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7h6",
+  tone: "M3 15c2.2-7 4.3-7 6 0s3.8 7 6 0 3.8-7 6 0",
+  pen: "M4 20l4.2-1L19 8.2a2 2 0 0 0-2.8-2.8L5.4 16.2zM14.5 7l2.5 2.5",
+  chat: "M4 5h16v11H10l-6 4z",
+  exam: "M9 3h6v3H9zM7 4.5H5V21h14V4.5h-2M9 13l2 2 4-4",
+  flame: "M12 3c.8 3.5 5 5.2 5 10a5 5 0 0 1-10 0c0-2.4 1.2-3.7 2.3-5 .3 1.6 1.1 2.6 2.2 3C12.9 8.6 11.6 5.8 12 3z",
+  star: "M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z",
+  settings: "M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4",
+  sound: "M4 9.5h3.5L12 5.5v13l-4.5-4H4zM15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11",
+  mic: "M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3",
+  review: "M20 11a8 8 0 0 0-14.3-4.9L4 8M4 3.5V8h4.5M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20.5V16h-4.5",
+  plus: "M12 5v14M5 12h14",
+  chart: "M4 20V11M10 20V5M16 20v-7M3 20h18",
+  offline: "M12 3v11M7.5 9.5 12 14l4.5-4.5M5 20h14",
+  gauge: "M4 17a8 8 0 1 1 16 0M12 17l3.5-4.5",
+  listen: "M4 15v-3a8 8 0 0 1 16 0v3M4 15h3v5H4zM17 15h3v5h-3z",
+  hint: "M9 18h6M10 21h4M12 3a6 6 0 0 0-3.8 10.6c.6.6.8 1.4.8 2.4h6c0-1 .3-1.8.9-2.4A6 6 0 0 0 12 3z",
+  trash: "M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14",
+  upload: "M12 20V8M7 12.5 12 8l5 4.5M5 4h14",
+  download: "M12 4v11M7 10.5 12 15l5-4.5M5 20h14",
+  restart: "M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 3.5v5h5",
+  close: "M6 6l12 12M18 6 6 18",
+  check: "M5 12.5l4.5 4.5L19 7",
+  alert: "M12 3.5 21.5 20h-19zM12 10v4.5M12 17.2v.3",
+  medal: "M8 3l4 6 4-6M12 21a6 6 0 1 0 0-12 6 6 0 0 0 0 12z",
+  link: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
+  back: "M15 5l-7 7 7 7",
+  arrow: "M5 12h14M13 6l6 6-6 6",
+  wave: "M7 11V5.5a1.5 1.5 0 0 1 3 0V10M10 9.5V4.5a1.5 1.5 0 0 1 3 0V10M13 9.5V5.5a1.5 1.5 0 0 1 3 0V12M16 10a1.5 1.5 0 0 1 3 0v4a7 7 0 0 1-12.6 4.2L4 14.6a1.5 1.5 0 0 1 2.4-1.8L7 13.5",
+  bowl: "M3 11h18a9 9 0 0 1-18 0zM8 7c0-1.5 1-1.5 1-3M12 7c0-1.5 1-1.5 1-3M16 7c0-1.5 1-1.5 1-3",
+  bag: "M5 8h14l-1 13H6zM9 8V6a3 3 0 0 1 6 0v2",
+  car: "M5 16V11l2-5h10l2 5v5M3 16h18v3h-3v-1H6v1H3zM5 11h14M7.5 13.5h1M15.5 13.5h1",
+};
+
+function icon(name, size = 20) {
+  const d = ICON_PATHS[name];
+  if (!d) {
+    return "";
+  }
+  return `<svg class="i i-${name}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
+}
+
 function renderTabbar(active) {
   document.getElementById("tabbar").innerHTML = TABS.map(
-    ([key, icon]) => `<a href="#${key}" class="${key === active ? "active" : ""}" ${key === active ? 'aria-current="page"' : ""}><span class="ic" aria-hidden="true">${icon}</span>${t(key)}</a>`
+    ([key, iconName]) => `<a href="#${key}" class="${key === active ? "active" : ""}" ${key === active ? 'aria-current="page"' : ""}><span class="ic">${icon(iconName, 22)}</span><span class="tab-label">${t(key)}</span></a>`
   ).join("");
 }
 
 function updateTopbar() {
-  document.getElementById("top-streak").textContent = `🔥 ${streakDays()}`;
+  document.getElementById("top-streak").innerHTML = `${icon("flame", 16)}<span>${streakDays()}</span>`;
   document.getElementById("top-streak").setAttribute("aria-label", `${streakDays()} ${t("streak")}`);
-  document.getElementById("top-xp").textContent = `⭐ ${state.xp}`;
+  document.getElementById("top-xp").innerHTML = `${icon("star", 16)}<span>${state.xp} XP</span>`;
   document.getElementById("top-xp").setAttribute("aria-label", `${state.xp} XP`);
   document.documentElement.lang = state.lang;
 }
@@ -1095,14 +1140,11 @@ function mascotLine(kind) {
 }
 
 function mascotSvg(mood = "happy", size = 72) {
-  const mouth = MASCOT_MOUTHS[mood] || MASCOT_MOUTHS.happy;
-  const brows = mood === "think" ? '<path d="M17 17 L27 15" stroke="#3a1a10" stroke-width="2.4" stroke-linecap="round"/>' : "";
+  // Nada, drawn as the app's seal: a vermilion chop stamp with the character 调 (tone). No cartoon face.
   return `<svg class="mascot mascot-${mood}" width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true">
-    <path d="M10 6 H54 A8 8 0 0 1 62 14 V44 A8 8 0 0 1 54 52 H30 L18 62 V52 H10 A8 8 0 0 1 2 44 V14 A8 8 0 0 1 10 6 Z" fill="var(--accent, #c8452a)"/>
-    <ellipse cx="24" cy="26" rx="5" ry="6" fill="#fff"/><ellipse cx="40" cy="26" rx="5" ry="6" fill="#fff"/>
-    <circle cx="25" cy="27" r="2.6" fill="#3a1a10"/><circle cx="41" cy="27" r="2.6" fill="#3a1a10"/>
-    <circle cx="14" cy="36" r="3" fill="#ff9d8a" opacity=".7"/><circle cx="50" cy="36" r="3" fill="#ff9d8a" opacity=".7"/>
-    ${brows}${mouth}
+    <rect x="4" y="4" width="56" height="56" rx="6" fill="var(--seal, #a8321f)"/>
+    <rect x="9" y="9" width="46" height="46" rx="3" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.5"/>
+    <text x="32" y="44" text-anchor="middle" font-size="32" fill="#fff" font-family="Kaiti SC, STKaiti, KaiTi, serif">调</text>
   </svg>`;
 }
 
@@ -1140,20 +1182,27 @@ function renderHome() {
   const weakest = weakestTone();
 
   view.innerHTML = `
-    <div class="row">${mascotSvg(goalPct >= 1 ? "cheer" : "happy", 44)}<h1>${t("greeting")}</h1><span class="spacer"></span>
-      <a href="#me" class="btn ghost small" aria-label="${t("settings")}">⚙️</a></div>
+    <div class="row page-head"><h1>${t("greeting")}</h1><span class="spacer"></span>
+      <a href="#me" class="icon-btn" aria-label="${t("settings")}">${icon("settings")}</a></div>
     <div class="card hero">
       <svg width="84" height="84" viewBox="0 0 84 84" role="img" aria-label="${t("dailyGoal")} ${Math.round(goalPct * 100)}%">
-        <circle cx="42" cy="42" r="34" stroke="rgba(255,255,255,.3)" stroke-width="9" fill="none"/>
-        <circle cx="42" cy="42" r="34" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round"
+        <circle class="ring-track" cx="42" cy="42" r="34" stroke-width="8" fill="none"/>
+        <circle class="ring-fill" cx="42" cy="42" r="34" stroke-width="8" fill="none" stroke-linecap="round"
           stroke-dasharray="${circumference}" stroke-dashoffset="${circumference * (1 - goalPct)}" transform="rotate(-90 42 42)"/>
-        <text x="42" y="48" text-anchor="middle" fill="#fff" font-size="17" font-weight="800">${Math.round(goalPct * 100)}%</text>
+        <text class="ring-text" x="42" y="48" text-anchor="middle" font-size="17" font-weight="600">${Math.round(goalPct * 100)}%</text>
       </svg>
       <div>
         <div class="label">${t("dailyGoal")}</div>
         <div class="big">${todayXp}/${state.goal} XP</div>
-        <div class="label">🔥 ${streakDays()} ${t("streak")}</div>
+        <div class="label">${streakDays()} ${t("streak")}</div>
       </div>
+    </div>
+
+    <div class="grid2">
+      <a class="card tile primary" href="#review"><span class="ic">${icon("review", 22)}</span><b>${t("reviewNow")}</b><span>${due} ${t("reviewDesc")}</span></a>
+      <a class="card tile" href="#learn"><span class="ic">${icon("plus", 22)}</span><b>${t("learnNew")}</b><span>${t("newDesc")}</span></a>
+      <a class="card tile" href="#tones"><span class="ic">${icon("tone", 22)}</span><b>${t("tones")}</b><span>${weakest ? `${t("weakTone")}: ${weakest}` : t("toneDesc")}</span></a>
+      <a class="card tile" href="#talk"><span class="ic">${icon("chat", 22)}</span><b>${t("talk")}</b><span>${t("talkDesc")}</span></a>
     </div>
 
     <a class="card row level-card" href="#me" style="text-decoration:none;color:inherit">
@@ -1163,7 +1212,7 @@ function renderHome() {
     </a>
 
     <div class="card">
-      <div class="row"><b>🧠 ${t("memoryTitle")}</b><span class="spacer"></span><span class="pill green">${t("strong")}: ${strong}</span></div>
+      <div class="row"><b>${t("memoryTitle")}</b><span class="spacer"></span><span class="pill green">${t("strong")}: ${strong}</span></div>
       <div class="row" style="align-items:baseline;margin-top:6px"><span style="font-size:38px;font-weight:800">${memory.toFixed(0)}</span><span class="muted">&nbsp;/ ${learnedCount} ${t("memoryNow")}</span></div>
       <svg viewBox="0 0 300 95" width="100%" height="95" style="margin-top:4px" role="img" aria-label="${t("in7")} ${memory7.toFixed(0)}">
         <line x1="0" y1="10" x2="300" y2="10" stroke="var(--line)" stroke-dasharray="4 4"/>
@@ -1187,20 +1236,15 @@ function renderHome() {
       <span aria-hidden="true">→</span>
     </a>
 
-    <div class="grid2">
-      <a class="card tile primary" href="#review"><span class="ic" aria-hidden="true">🔁</span><b>${t("reviewNow")}</b><span>${due} ${t("reviewDesc")}</span></a>
-      <a class="card tile" href="#learn"><span class="ic" aria-hidden="true">✨</span><b>${t("learnNew")}</b><span>${t("newDesc")}</span></a>
-      <a class="card tile" href="#tones"><span class="ic" aria-hidden="true">🎵</span><b>${t("tones")}</b><span>${weakest ? `${t("weakTone")}: ${weakest}` : t("toneDesc")}</span></a>
-      <a class="card tile" href="#talk"><span class="ic" aria-hidden="true">💬</span><b>${t("talk")}</b><span>${t("talkDesc")}</span></a>
-    </div>
+    
 
     <div class="card">
-      <b>📈 ${t("week")}</b>
+      <b>${t("week")}</b>
       <div class="bars" role="img" aria-label="${week.map((w) => `${w.label} ${w.xp} XP`).join(", ")}">
         ${week.map((w) => `<div class="bar"><i style="height:${Math.max(3, (w.xp / weekMax) * 70)}px"></i>${w.label}</div>`).join("")}
       </div>
     </div>
-    <p class="sub center">📶 ${t("offline")}</p>`;
+    <p class="sub center offline-note">${icon("offline", 16)} ${t("offline")}</p>`;
 }
 
 function weakestTone() {
@@ -1226,10 +1270,10 @@ function renderVocab() {
   let level = state.level;
 
   view.innerHTML = `
-    <h1>📚 ${t("vocab")}</h1>
+    <h1>${t("vocab")}</h1>
     <div class="grid2">
-      <a class="card tile primary" href="#review"><span class="ic" aria-hidden="true">🔁</span><b>${t("reviewNow")}</b><span>${due} ${t("reviewDesc")}</span></a>
-      <a class="card tile" href="#learn"><span class="ic" aria-hidden="true">✨</span><b>${t("learnNew")}</b><span>HSK ${state.level} · ${t("newDesc")}</span></a>
+      <a class="card tile primary" href="#review"><span class="ic">${icon("review", 22)}</span><b>${t("reviewNow")}</b><span>${due} ${t("reviewDesc")}</span></a>
+      <a class="card tile" href="#learn"><span class="ic">${icon("plus", 22)}</span><b>${t("learnNew")}</b><span>HSK ${state.level} · ${t("newDesc")}</span></a>
     </div>
     <div class="row wrap" role="tablist" aria-label="${t("level")}" style="margin:10px 0">
       ${LEVELS.map((lv) => `<button class="chip ${lv === level ? "on" : ""}" role="tab" aria-selected="${lv === level}" data-lv="${lv}">HSK ${lv}</button>`).join("")}
@@ -1305,7 +1349,10 @@ function exampleFor(word) {
 
 function exampleTranslation(ex) {
   if (state.lang === "id") {
-    return ex[2] ? esc(ex[2]) : `${esc(ex[3])} <span class="pill tiny">EN</span>`;
+    if (!ex[2]) {
+      return `${esc(ex[3])} <span class="pill tiny">EN</span>`;
+    }
+    return ex[6] ? `${esc(ex[2])} <span class="mt-tag" title="Terjemahan mesin, belum dicek manusia">MT</span>` : esc(ex[2]);
   }
   return esc(ex[3] || ex[2]);
 }
@@ -1338,19 +1385,19 @@ function composedSentencePlan(text) {
 function wordCardHtml(word, withExample = true) {
   const ex = exampleFor(word);
   return `
-    <div class="hanzi-big">${coloredHanzi(word)}</div>
+    <div class="hanzi-big" data-len="${[...word.hanzi].length}">${coloredHanzi(word)}</div>
     <div class="pinyin">${coloredPinyin(word)}</div>
     <div class="meaning">${esc(gloss(word))}<small>${esc(glossOther(word))}</small></div>
-    <div class="center" style="margin-top:10px"><button class="btn ghost small" data-say="${esc(word.hanzi)}" aria-label="${t("listen")} ${esc(word.hanzi)}">🔊 ${t("listen")}</button>
+    <div class="center" style="margin-top:10px"><button class="btn ghost small" data-say="${esc(word.hanzi)}" aria-label="${t("listen")} ${esc(word.hanzi)}">${icon("sound", 18)} ${t("listen")}</button>
       <span class="pill tiny">HSK ${word.level}</span></div>
-    ${withExample && ex ? `<button class="example" data-say="${esc(ex[0])}" aria-label="${t("listen")}: ${esc(ex[0])}"><div class="zh">${zh(ex[0])} 🔊</div><div class="py">${esc(ex[1])}</div><div>${exampleTranslation(ex)}</div></button>${ex[4] ? `<div class="tiny muted center" style="margin-top:4px">Tatoeba <a href="https://tatoeba.org/sentences/show/${ex[4]}" target="_blank" rel="noopener">#${ex[4]}</a> · CC BY 2.0 FR</div>` : ""}` : ""}`;
+    ${withExample && ex ? `<button class="example" data-say="${esc(ex[0])}" aria-label="${t("listen")}: ${esc(ex[0])}"><div class="zh">${zh(ex[0])} <span class="say-ic">${icon("sound", 16)}</span></div><div class="py">${esc(ex[1])}</div><div>${exampleTranslation(ex)}</div></button>${ex[4] ? `<div class="tiny muted center" style="margin-top:4px">Tatoeba <a href="https://tatoeba.org/sentences/show/${ex[4]}" target="_blank" rel="noopener">#${ex[4]}</a> · CC BY 2.0 FR</div>` : ""}` : ""}`;
 }
 
 // ---------- Learn new words ----------
 function renderLearnSession() {
   const fresh = wordsAtLevel(state.level).filter((w) => !state.cards[w.hanzi]).slice(0, NEW_PER_SESSION);
   if (!fresh.length) {
-    view.innerHTML = `<div class="card center">${mascotSvg("cheer", 88)}<h1>🏆 HSK ${state.level}</h1><p>${t("perfect")}</p><a class="btn" href="#me">${t("level")} →</a></div>`;
+    view.innerHTML = `<div class="card center">${mascotSvg("cheer", 88)}<h1>HSK ${state.level}</h1><p>${t("perfect")}</p><a class="btn" href="#me">${t("level")} →</a></div>`;
     return;
   }
   let step = 0;
@@ -1396,7 +1443,7 @@ function renderLearnSession() {
     view.innerHTML = `
       <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="${fresh.length * 2}" aria-valuenow="${fresh.length + answered}"><div style="width:${((fresh.length + answered) / (fresh.length * 2)) * 100}%"></div></div>
       <h1 class="sub">${t("quizTime")}</h1>
-      <div class="card"><div class="hanzi-big">${coloredHanzi(word)}</div><div class="pinyin">${coloredPinyin(word)}</div></div>
+      <div class="card"><div class="hanzi-big" data-len="${[...word.hanzi].length}">${coloredHanzi(word)}</div><div class="pinyin">${coloredPinyin(word)}</div></div>
       <div class="options">${options.map((o, i) => `<button class="option" data-i="${i}"><span class="key" aria-hidden="true">${i + 1}</span> ${esc(gloss(o))}</button>`).join("")}</div>`;
     let locked = false;
     const pick = (i) => {
@@ -1438,7 +1485,7 @@ function renderLearnSession() {
     view.innerHTML = `
       <div class="card center pop">
         ${mascotSvg("cheer", 88)}
-        <h1>${t("done")} 🎉</h1>
+        <h1>${t("done")}</h1>
         <p class="sub">${esc(mascotLine("done"))}</p>
         <p>${t("xpEarned")}: <b>+${xpGained + 5}</b></p>
         <div class="row wrap" style="justify-content:center">${fresh.map((w) => `<span class="pill ${firstTry.get(w.hanzi) ? "green" : ""}" style="font-size:18px">${zh(w.hanzi)}</span>`).join("")}</div>
@@ -1467,9 +1514,9 @@ function renderReviewSession() {
       addXP(xpGained);
       const fit = updatePersonalization();
       const personalLine = fit.n >= PERSONAL_MIN_REVIEWS
-        ? `<p class="sub">🧠 ${t("personalScale")}: <b>${fit.k.toFixed(2)}${t("personalVs")}</b></p>`
+        ? `<p class="sub">${t("personalScale")}: <b>${fit.k.toFixed(2)}${t("personalVs")}</b></p>`
         : "";
-      view.innerHTML = `<div class="card center pop">${mascotSvg("cheer", 88)}<h1>${t("done")} 🎉</h1><p class="sub">${esc(mascotLine("done"))}</p><p>${t("xpEarned")}: <b>+${xpGained}</b></p>${personalLine}</div><a class="btn block" href="#home">${t("backHome")}</a>`;
+      view.innerHTML = `<div class="card center pop">${mascotSvg("cheer", 88)}<h1>${t("done")}</h1><p class="sub">${esc(mascotLine("done"))}</p><p>${t("xpEarned")}: <b>+${xpGained}</b></p>${personalLine}</div><a class="btn block" href="#home">${t("backHome")}</a>`;
       announce(t("done"));
       celebrate();
       return;
@@ -1539,10 +1586,10 @@ function renderTones(mode = "hear") {
     .join("")}</div>`;
 
   view.innerHTML = `
-    <h1>🎵 ${t("tones")}</h1>
+    <h1>${t("tones")}</h1>
     <div class="row" role="tablist" style="margin-bottom:10px">
-      <a class="chip ${mode === "hear" ? "on" : ""}" role="tab" aria-selected="${mode === "hear"}" href="#tones/hear">👂 ${t("hearMode")}</a>
-      <a class="chip ${mode === "speak" ? "on" : ""}" role="tab" aria-selected="${mode === "speak"}" href="#tones/speak">🎤 ${t("speakMode")}</a>
+      <a class="chip ${mode === "hear" ? "on" : ""}" role="tab" aria-selected="${mode === "hear"}" href="#tones/hear">${icon("listen", 16)} ${t("hearMode")}</a>
+      <a class="chip ${mode === "speak" ? "on" : ""}" role="tab" aria-selected="${mode === "speak"}" href="#tones/speak">${icon("mic", 16)} ${t("speakMode")}</a>
     </div>
     <div id="tone-body"></div>`;
   const body = document.getElementById("tone-body");
@@ -1569,7 +1616,7 @@ function renderToneHear(body, statsHtml) {
       addXP(right);
       body.innerHTML = `${statsHtml(state.tones)}
         <div class="card center">${mascotSvg(right === words.length ? "cheer" : "encourage", 80)}<h1>${right}/${words.length}</h1><p>${right === words.length ? t("perfect") : t("keepGoing")}</p><p class="sub">${esc(mascotLine(right === words.length ? "perfect" : "tryAgain"))}</p></div>
-        <button class="btn block" id="again">${t("practice")} ↻</button>`;
+        <button class="btn block" id="again">${icon("restart", 18)} ${t("practice")}</button>`;
       document.getElementById("again").onclick = () => renderTones("hear");
       return;
     }
@@ -1584,8 +1631,8 @@ function renderToneHear(body, statsHtml) {
         <div style="font-size:40px;font-weight:700;margin:4px 0">${stripTone(word.pinyin)}</div>
         <div id="hint" class="muted" style="min-height:24px" aria-live="polite">${showHint ? `${zh(word.hanzi)} · ${esc(gloss(word))}` : ""}</div>
         <div class="row" style="justify-content:center;margin-top:8px">
-          <button class="btn" id="play">🔊 ${t("listen")} <span class="key" aria-hidden="true">R</span></button>
-          <button class="btn ghost" id="hintBtn">💡 ${t("hint")}</button>
+          <button class="btn" id="play">${icon("sound", 18)} ${t("listen")} <span class="key" aria-hidden="true">R</span></button>
+          <button class="btn ghost" id="hintBtn">${icon("hint", 18)} ${t("hint")}</button>
         </div>
         <div class="tone-btns" role="group" aria-label="${t("whichTone")}">
           ${[1, 2, 3, 4].map((tone) => `<button class="tone-btn" data-tone="${tone}" aria-label="${t("tone" + tone)}, ${t("toneNames")[tone]}">${toneSvg(tone)}<b class="t${tone}">${tone}</b><small class="muted">${t("toneNames")[tone]}</small></button>`).join("")}
@@ -1666,7 +1713,7 @@ function toneLogCsv(log) {
 }
 
 function toneAccuracyNote() {
-  return `<p class="small-text muted">🎯 ${t("toneAccuracy")}: ${(TONE_MIRROR_ACCURACY * 100).toFixed(0)}%</p>`;
+  return `<p class="small-text muted">${t("toneAccuracy")}: ${(TONE_MIRROR_ACCURACY * 100).toFixed(0)}%</p>`;
 }
 
 function renderToneMirror(body, statsHtml) {
@@ -1687,8 +1734,8 @@ function renderToneMirror(body, statsHtml) {
         </svg>
         <div id="mirror-result" aria-live="polite" style="min-height:48px"></div>
         <div class="row" style="justify-content:center">
-          <button class="btn ghost" id="native">🔊 ${t("listen")}</button>
-          <button class="btn dark" id="rec" aria-label="${t("hold")}">🎤 ${t("hold")}</button>
+          <button class="btn ghost" id="native">${icon("sound", 18)} ${t("listen")}</button>
+          <button class="btn dark" id="rec" aria-label="${t("hold")}">${icon("mic", 18)} ${t("hold")}</button>
           <button class="btn ghost" id="skip" aria-label="${t("next")}">→</button>
         </div>
       </div>`;
@@ -1759,7 +1806,7 @@ function renderToneMirror(body, statsHtml) {
       addXP(2);
     }
     saveState();
-    out.innerHTML = `<b class="${ok ? "ok" : "bad"}">${ok ? t("correct") : t("wrong")}</b> — ${t("youSaidTone")}: <b class="t${result.tone}">${t("tone" + result.tone)}</b> (${t("toneNames")[result.tone]})`;
+    out.innerHTML = `<b class="${ok ? "ok" : "bad"}">${ok ? t("correct") : t("wrong")}</b> · ${t("youSaidTone")}: <b class="t${result.tone}">${t("tone" + result.tone)}</b> (${t("toneNames")[result.tone]})`;
   }
 
   draw();
@@ -1814,15 +1861,15 @@ function renderWrite(arg) {
   let mode = "trace";
 
   view.innerHTML = `
-    <h1>✍️ ${t("write")}</h1>
+    <h1>${t("write")}</h1>
     <p class="sub">${t("writeTip")}</p>
     <div class="card center">
       <div class="pinyin">${coloredPinyin(word)}</div>
       <div class="meaning">${esc(gloss(word))}</div>
       <div class="row" role="tablist" style="justify-content:center;margin:8px 0">
         <button class="chip" data-mode="watch">▶ ${t("watch")}</button>
-        <button class="chip on" data-mode="trace">✍️ ${t("trace")}</button>
-        <button class="chip" data-mode="recall">🧠 ${t("recall")}</button>
+        <button class="chip on" data-mode="trace">${t("trace")}</button>
+        <button class="chip" data-mode="recall">${t("recall")}</button>
       </div>
       <div class="write-box">
         <svg id="glyph" viewBox="0 0 1024 1024" width="280" height="280" role="img" aria-label="${esc(word.hanzi)}">
@@ -1832,8 +1879,8 @@ function renderWrite(arg) {
       </div>
       <div id="write-status" class="muted" aria-live="polite" style="min-height:24px"></div>
       <div class="row" style="justify-content:center">
-        <button class="btn ghost small" data-say="${esc(word.hanzi)}" aria-label="${t("listen")}">🔊</button>
-        <button class="btn ghost small" id="restart">↺</button>
+        <button class="btn ghost small" data-say="${esc(word.hanzi)}" aria-label="${t("listen")}">${icon("sound", 18)}</button>
+        <button class="btn ghost small" id="restart" aria-label="${t("practice")}">${icon("restart", 18)}</button>
       </div>
     </div>
     <button class="btn block dark" id="next">${t("next")} →</button>`;
@@ -1940,7 +1987,7 @@ function renderWrite(arg) {
         paint();
         if (strokeIndex >= data.s.length) {
           const score = Math.round((firstTry / data.s.length) * 100);
-          status(`${t("writeDone")} — ${score}%`);
+          status(`${t("writeDone")}: ${score}%`);
           announce(`${t("writeDone")} ${score}%`);
           addXP(Math.round(score / (mode === "recall" ? 12 : 25)));
           playWord(word);
@@ -1974,11 +2021,11 @@ function renderWrite(arg) {
 function renderTalk(arg) {
   if (arg === undefined) {
     view.innerHTML = `
-      <h1>💬 ${t("talk")}</h1>
+      <h1>${t("talk")}</h1>
       <p class="sub">${t("talkTip")}</p>
       ${SCENARIOS.map((s, i) => `
         <a class="card row" href="#talk/${i}" style="text-decoration:none;color:inherit">
-          <span style="font-size:34px" aria-hidden="true">${s.icon}</span>
+          <span class="scene-ic">${icon(s.icon, 26)}</span>
           <div style="flex:1"><b>${state.lang === "id" ? s.id : s.en}</b><div class="muted" style="font-size:13px">${s.steps.length}× · ${zh(s.steps[0].bot[0])}</div></div>
           ${state.talkBest[s.key] !== undefined ? `<span class="pill green">${t("best")} ${state.talkBest[s.key]}%</span>` : `<span class="pill">${t("start")}</span>`}
         </a>`).join("")}`;
@@ -1999,7 +2046,7 @@ function renderTalk(arg) {
     const finished = step >= scenario.steps.length;
     const current = finished ? null : scenario.steps[step];
     view.innerHTML = `
-      <div class="row"><a href="#talk" class="btn ghost small" aria-label="←">←</a><h1 style="margin:0">${scenario.icon} ${state.lang === "id" ? scenario.id : scenario.en}</h1></div>
+      <div class="row"><a href="#talk" class="btn ghost small" aria-label="${t("back")}">${icon("back", 18)}</a><h1 style="margin:0">${state.lang === "id" ? scenario.id : scenario.en}</h1></div>
       <div class="progress"><div style="width:${(step / scenario.steps.length) * 100}%"></div></div>
       <div class="chat" aria-live="polite">
         ${history.join("")}
@@ -2024,7 +2071,7 @@ function renderTalk(arg) {
     bindShadow(current.bot[0]);
     box.innerHTML = `
       ${current.replies.map((r, i) => `<button class="option" data-reply="${i}"><span class="key" aria-hidden="true">${i + 1}</span><div style="font-size:19px">${zh(r.zh)}</div><div class="muted" style="font-size:12px">${r.py}</div></button>`).join("")}
-      ${canRecognize ? `<button class="btn dark block" id="mic">🎤 ${t("speak")}</button>` : ""}
+      ${canRecognize ? `<button class="btn dark block" id="mic">${icon("mic", 18)} ${t("speak")}</button>` : ""}
       <div id="heard" class="muted center" aria-live="polite"></div>`;
     bind("[data-reply]", (el) => choose(Number(el.dataset.reply)));
     keyHandler = (e) => {
@@ -2065,7 +2112,7 @@ function renderTalk(arg) {
       missedThisStep = true;
       button.classList.add("wrong");
       if (!button.querySelector(".bad")) {
-        button.insertAdjacentHTML("beforeend", `<div class="bad" style="font-size:13px">✗ ${esc(state.lang === "id" ? reply.id : reply.en)}</div>`);
+        button.insertAdjacentHTML("beforeend", `<div class="bad" style="font-size:13px">${icon("close", 14)} ${esc(state.lang === "id" ? reply.id : reply.en)}</div>`);
       }
       announce(`${t("wrong")}: ${state.lang === "id" ? reply.id : reply.en}`);
       return;
@@ -2086,8 +2133,8 @@ function renderTalk(arg) {
 function shadowHtml() {
   return `<div class="card shadow-box">
     <div class="row wrap" style="justify-content:center">
-      <button class="btn dark small" id="shadow-rec" aria-label="${t("shadowHold")}">🎙 ${t("shadowHold")}</button>
-      <button class="btn ghost small" id="shadow-native" aria-label="${t("listen")}">🔊 ${t("listen")}</button>
+      <button class="btn dark small" id="shadow-rec" aria-label="${t("shadowHold")}">${icon("mic", 16)} ${t("shadowHold")}</button>
+      <button class="btn ghost small" id="shadow-native" aria-label="${t("listen")}">${icon("sound", 16)} ${t("listen")}</button>
       <button class="btn ghost small" id="shadow-mine" disabled aria-label="${t("shadowMine")}">▶ ${t("shadowMine")}</button>
     </div>
     <svg id="shadow-pitch" viewBox="0 0 300 60" width="100%" height="60" aria-hidden="true"></svg>
@@ -2182,7 +2229,7 @@ function listenOnce(onText) {
 function renderExam() {
   const best = state.examBest[state.level];
   view.innerHTML = `
-    <h1>📝 ${t("exam")} · HSK ${state.level}</h1>
+    <h1>${t("exam")} · HSK ${state.level}</h1>
     <div class="card"><p>${t("examTip")}</p>
       ${best !== undefined ? `<p><span class="pill green">${t("best")}: ${best}/10</span></p>` : ""}
       <button class="btn block" id="go">${t("startExam")}</button></div>`;
@@ -2205,7 +2252,7 @@ function runExam() {
       case "pinyin":
         return `<p class="sub">${t("pinyinQ")}</p><div class="pinyin" style="font-size:32px">${w.pinyin}</div>`;
       case "listen":
-        return `<p class="sub">${t("listenQ")}</p><div class="center"><button class="btn" id="play">🔊 ${t("listen")}</button></div>`;
+        return `<p class="sub">${t("listenQ")}</p><div class="center"><button class="btn" id="play">${icon("sound", 18)} ${t("listen")}</button></div>`;
       default:
         return `<p class="sub">${t("toneQ")}</p><div class="hanzi-big">${zh(w.hanzi)}</div><div class="pinyin">${stripTone(w.pinyin)}</div>`;
     }
@@ -2223,12 +2270,12 @@ function runExam() {
       state.examBest[state.level] = Math.max(state.examBest[state.level] || 0, score);
       addXP(score * 2);
       view.innerHTML = `
-        <h1>📝 ${t("result")} · HSK ${state.level}</h1>
+        <h1>${t("result")} · HSK ${state.level}</h1>
         <div class="card center"><div style="font-size:52px;font-weight:800">${score}<span class="muted" style="font-size:20px"> ${t("ofTen")}</span></div>
         <p>${t("readiness")}: <b>${score * 10}%</b></p>
         <div class="row wrap" style="justify-content:center">${missed.map((w) => `<span class="pill" style="font-size:18px">${zh(w.hanzi)} ${w.pinyin}</span>`).join("")}</div></div>
         ${missed.length ? `<button class="btn block" id="add">${t("addMissed")}</button>` : ""}
-        <a class="btn block ghost" style="margin-top:10px" href="#exam">↻</a>`;
+        <a class="btn block ghost" style="margin-top:10px" href="#exam">${icon("restart", 18)} ${t("retake")}</a>`;
       announce(`${t("result")}: ${score} ${t("ofTen")}`);
       const add = document.getElementById("add");
       if (add) {
@@ -2315,7 +2362,7 @@ function renderStats() {
       ${cal.count ? `<p class="small-text">n = ${cal.count} · Brier ${cal.brier.toFixed(3)} · ECE ${(cal.ece * 100).toFixed(1)}%</p>` : ""}
     </div>
     <div class="card">
-      <b>🧠 ${t("personalTitle")}</b>
+      <b>${t("personalTitle")}</b>
       <p class="sub">${t("personalDesc")}</p>
       ${(() => {
         const fit = fitStabilityScale(state.log);
@@ -2327,7 +2374,7 @@ function renderStats() {
       })()}
     </div>
     <div class="card">
-      <b>🏅 ${t("badges")}</b>
+      <b>${t("badges")}</b>
       <div class="row wrap" style="margin-top:8px">${[...STREAK_BADGES.map((n) => `streak-${n}`), ...WORD_BADGES.map((n) => `words-${n}`)].map((id) => `<span class="badge ${earnedBadges().includes(id) ? "on" : ""}">${badgeLabel(id)}</span>`).join("")}</div>
     </div>
     <div class="card">
@@ -2347,7 +2394,7 @@ function renderIndo() {
     <div class="row"><a href="#home" class="btn ghost small" aria-label="←">←</a><h1 style="margin:0">${FLAG_ID} ${t("indoTitle")}</h1></div>
     <p class="sub">${t("indoDesc")}</p>
     <div class="card">
-      <b>🤝 ${t("loanTitle")}</b>
+      <b>${t("loanTitle")}</b>
       <p class="sub">${t("loanDesc")}</p>
       ${LOANWORDS.map((w) => `
         <div class="list-item loan">
@@ -2358,10 +2405,10 @@ function renderIndo() {
           ${w.hsk ? `<span class="pill blue tiny">HSK ${w.hsk}</span>` : ""}
           <span class="muted small-text loan-mean">${esc(state.lang === "id" ? w.id : w.en)} · Hokkien <i>${esc(w.hok)}</i></span>
         </div>`).join("")}
-      <p class="small-text muted">${t("source")}: Wikipedia — List of Chinese loanwords in Indonesian</p>
+      <p class="small-text muted">${t("source")}: Wikipedia, List of Chinese loanwords in Indonesian</p>
     </div>
     <div class="card">
-      <b>⚠️ ${t("trapTitle")}</b>
+      <b>${t("trapTitle")}</b>
       <p class="sub">${t("trapDesc")}</p>
       ${PINYIN_TRAPS.map((trap) => `
         <div class="trap">
@@ -2379,7 +2426,7 @@ function renderIndo() {
 // ---------- Settings ----------
 function renderSettings() {
   view.innerHTML = `
-    <h1>⚙️ ${t("settings")}</h1>
+    <h1>${t("settings")}</h1>
     <div class="card">
       <div class="list-item"><label for="lang" style="flex:1">${t("language")}</label>
         <select id="lang"><option value="id">Bahasa Indonesia</option><option value="en">English</option></select></div>
@@ -2393,14 +2440,14 @@ function renderSettings() {
       <div class="list-item"><label for="online" style="flex:1">${t("onlineSpeech")}</label><input type="checkbox" id="online" ${state.onlineSpeech ? "checked" : ""}></div>
     </div>
     <div class="card">
-      <a class="btn block ghost" href="#stats">📊 ${t("stats")}</a>
+      <a class="btn block ghost" href="#stats">${icon("chart", 18)} ${t("stats")}</a>
       <button class="btn block ghost" id="export" style="margin-top:10px">⬇️ ${t("exportData")}</button>
-      <button class="btn block ghost" id="csv" style="margin-top:10px">🧪 ${t("studyData")}</button>
-      <button class="btn block ghost" id="csvTones" style="margin-top:10px">🎤 ${t("toneData")} (${(state.toneLog || []).length})</button>
-      <label class="btn block ghost" style="margin-top:10px">⬆️ ${t("importData")}<input type="file" id="import" accept="application/json" class="sr-only"></label>
-      <button class="btn block" id="reset" style="margin-top:10px">🗑️ ${t("reset")}</button>
+      <button class="btn block ghost" id="csv" style="margin-top:10px">${icon("download", 18)} ${t("studyData")}</button>
+      <button class="btn block ghost" id="csvTones" style="margin-top:10px">${icon("download", 18)} ${t("toneData")} (${(state.toneLog || []).length})</button>
+      <label class="btn block ghost" style="margin-top:10px">${icon("upload", 18)} ${t("importData")}<input type="file" id="import" accept="application/json" class="sr-only"></label>
+      <button class="btn block" id="reset" style="margin-top:10px">${icon("trash", 18)} ${t("reset")}</button>
     </div>
-    <p class="sub center">📶 ${t("offline")}</p>
+    <p class="sub center offline-note">${icon("offline", 16)} ${t("offline")}</p>
     <p class="sub center small-text">Data: HSK 3.0 list (complete-hsk-vocabulary, MIT) · CC-CIDICT (CC BY-SA 4.0) · audio-cmn / Shtooka (CC BY-SA) · Make Me a Hanzi stroke data (Arphic PL)</p>`;
   const lang = document.getElementById("lang");
   lang.value = state.lang;

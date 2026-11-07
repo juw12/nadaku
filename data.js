@@ -118,7 +118,7 @@ const EXAMPLES = {
 // Each step: bot line + 3 replies; exactly one reply is correct.
 const SCENARIOS = [
   {
-    key: "intro", icon: "👋", id: "Kenalan", en: "Introductions",
+    key: "intro", icon: "wave", id: "Kenalan", en: "Introductions",
     steps: [
       {
         bot: ["你好！你叫什么名字？", "Nǐ hǎo! Nǐ jiào shén me míng zi?", "Halo! Siapa namamu?", "Hi! What's your name?"],
@@ -148,7 +148,7 @@ const SCENARIOS = [
     end: ["你说得很好！再见！", "Nǐ shuō de hěn hǎo! Zài jiàn!", "Bahasa Mandarinmu bagus! Sampai jumpa!", "You speak well! Bye!"],
   },
   {
-    key: "food", icon: "🍜", id: "Di Restoran", en: "At a Restaurant",
+    key: "food", icon: "bowl", id: "Di Restoran", en: "At a Restaurant",
     steps: [
       {
         bot: ["你好，请坐！你想吃什么？", "Nǐ hǎo, qǐng zuò! Nǐ xiǎng chī shén me?", "Halo, silakan duduk! Mau makan apa?", "Hello, have a seat! What would you like to eat?"],
@@ -178,7 +178,7 @@ const SCENARIOS = [
     end: ["谢谢！再见！", "Xiè xie! Zài jiàn!", "Terima kasih! Sampai jumpa!", "Thank you! Goodbye!"],
   },
   {
-    key: "market", icon: "🍎", id: "Belanja di Pasar", en: "Shopping at the Market",
+    key: "market", icon: "bag", id: "Belanja di Pasar", en: "Shopping at the Market",
     steps: [
       {
         bot: ["你好！你想买什么？", "Nǐ hǎo! Nǐ xiǎng mǎi shén me?", "Halo! Mau beli apa?", "Hi! What would you like to buy?"],
@@ -208,7 +208,7 @@ const SCENARIOS = [
     end: ["好吧，十二块！", "Hǎo ba, shí èr kuài!", "Ya sudah, dua belas yuan!", "Fine, twelve yuan!"],
   },
   {
-    key: "taxi", icon: "🚕", id: "Naik Taksi", en: "Taking a Taxi",
+    key: "taxi", icon: "car", id: "Naik Taksi", en: "Taking a Taxi",
     steps: [
       {
         bot: ["你好！你去哪里？", "Nǐ hǎo! Nǐ qù nǎ lǐ?", "Halo! Mau ke mana?", "Hi! Where are you going?"],

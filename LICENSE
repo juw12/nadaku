@@ -26,3 +26,4 @@ Third-party data bundled with the app keeps its own licence:
 - strokes/ : Make Me a Hanzi / hanzi-writer-data, Arphic Public License
 - HSK word list : complete-hsk-vocabulary, MIT
 - Loanword list in indo.js : Wikipedia "List of Chinese loanwords in Indonesian", CC BY-SA 4.0
+- Example sentences in tatoeba.js : Tatoeba (https://tatoeba.org), CC BY 2.0 FR; each row keeps its sentence id

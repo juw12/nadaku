@@ -460,3 +460,14 @@ select { background: var(--surface); color: var(--ink); border: 2px solid var(--
 .loan-mean { flex-basis: 100%; }
 .trap { border-top: 1px solid var(--line); padding: 10px 0; }
 .trap p { margin: 6px 0 8px; }
+
+/* Nada the mascot */
+.mascot { flex: none; display: inline-block; animation: nada-bob 3.2s ease-in-out infinite; transform-origin: 50% 90%; }
+.mascot-cheer { animation: nada-hop 1.4s ease-in-out infinite; }
+.card.center .mascot { margin: 0 auto 6px; display: block; }
+.row > .mascot { margin-right: 8px; }
+.mascot-say { display: flex; align-items: flex-end; gap: 10px; margin: 6px 0 14px; }
+.say-bubble { position: relative; background: var(--surface, #fff); color: var(--ink, #1f1b24); border: 1px solid var(--line, #e7ddd3); border-radius: 16px 16px 16px 4px; padding: 10px 14px; font-weight: 600; line-height: 1.4; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+@keyframes nada-bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-3px) rotate(-2deg); } }
+@keyframes nada-hop { 0%, 100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-8px) scale(1.04, .97); } 60% { transform: translateY(0) scale(.98, 1.03); } }
+@media (prefers-reduced-motion: reduce) { .mascot, .mascot-cheer { animation: none; } }

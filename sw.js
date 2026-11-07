@@ -1,8 +1,8 @@
 // Offline-first service worker. Core files are precached; audio and stroke files are cached the first time they are used.
-const CORE = "nadaku-core-v4";
+const CORE = "nadaku-core-v5";
 const MEDIA = "nadaku-media-v2";
 const CORE_FILES = [
-  "./", "index.html", "styles.css", "app.js", "words.js", "data.js", "sentences.js", "syllables.js", "indo.js", "manifest.json",
+  "./", "index.html", "styles.css", "app.js", "words.js", "data.js", "sentences.js", "syllables.js", "indo.js", "tatoeba.js", "manifest.json",
   "icons/icon-192.png", "icons/icon-512.png",
 ];
 

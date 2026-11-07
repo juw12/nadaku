@@ -56,7 +56,7 @@ const STRINGS = {
     search: "Cari hanzi, pinyin, atau arti…", more: "Tampilkan lebih banyak", stats: "Statistik & kalibrasi",
     calibration: "Kalibrasi Meteran Memori", calibDesc: "Prediksi ingatan vs. hasil review sebenarnya. Garis diagonal = sempurna.",
     calibEmpty: "Butuh minimal 20 review untuk kalibrasi.", reviews: "review", predicted: "prediksi", actual: "aktual",
-    studyData: "Ekspor data studi (CSV)", chooseLevel: "Pilih level kamu", levelWords: "kata",
+    studyData: "Ekspor data studi (CSV)", toneData: "Ekspor latihan nada (CSV)", chooseLevel: "Pilih level kamu", levelWords: "kata",
     welcome: "Selamat datang di Nadaku", welcomeSub: "Belajar Mandarin dengan audio penutur asli, nada, dan urutan goresan — offline.",
     keys: "Pintasan: Spasi = tunjukkan, 1–4 = nilai/pilih, R = putar ulang",
     noAudio: "Rekaman untuk kata ini belum terpasang (jalankan finish_audio.bat).",
@@ -106,7 +106,7 @@ const STRINGS = {
     search: "Search hanzi, pinyin or meaning…", more: "Show more", stats: "Stats & calibration",
     calibration: "Memory Meter calibration", calibDesc: "Predicted recall vs. actual review results. Diagonal = perfect.",
     calibEmpty: "Needs at least 20 reviews to calibrate.", reviews: "reviews", predicted: "predicted", actual: "actual",
-    studyData: "Export study data (CSV)", chooseLevel: "Choose your level", levelWords: "words",
+    studyData: "Export study data (CSV)", toneData: "Export tone practice (CSV)", chooseLevel: "Choose your level", levelWords: "words",
     welcome: "Welcome to Nadaku", welcomeSub: "Learn Mandarin with native audio, tones and stroke order — offline.",
     keys: "Shortcuts: Space = show, 1–4 = rate/choose, R = replay",
     noAudio: "Recording for this word is not installed yet (run finish_audio.bat).",
@@ -674,7 +674,7 @@ function playSyllable(base, tone, fallbackText) {
 
 // Sentences: system TTS sounds most natural when a Chinese voice exists; otherwise native syllable recordings.
 function playSentence(text) {
-  const plan = typeof SENTENCE_AUDIO !== "undefined" ? SENTENCE_AUDIO[text] : null;
+  const plan = (typeof SENTENCE_AUDIO !== "undefined" ? SENTENCE_AUDIO[text] : null) || composedSentencePlan(text);
   const voices = "speechSynthesis" in window ? speechSynthesis.getVoices() : [];
   if (voices.some((v) => /^zh/i.test(v.lang))) {
     stopAudio();
@@ -1041,6 +1041,7 @@ function renderOnboarding() {
       <div class="big" style="font-size:26px">${t("welcome")}</div>
       <div class="label">${t("welcomeSub")}</div>
     </div>
+    ${mascotSay("cheer", mascotLine("welcome"))}
     <div class="row" role="group" aria-label="${t("language")}">
       <button class="btn ${state.lang === "id" ? "" : "ghost"} small" data-lang="id">Bahasa Indonesia</button>
       <button class="btn ${state.lang === "en" ? "" : "ghost"} small" data-lang="en">English</button>
@@ -1061,6 +1062,52 @@ function renderOnboarding() {
     location.hash = "home";
     route();
   });
+}
+
+
+// ---------- Nada, the mascot: a speech bubble whose mouth is a tone curve ----------
+const MASCOT_MOUTHS = {
+  happy: '<path d="M22 38 Q32 48 42 38" fill="none" stroke="#3a1a10" stroke-width="3.2" stroke-linecap="round"/>',
+  cheer: '<path d="M21 36 Q32 52 43 36 Z" fill="#3a1a10"/><path d="M26 41 Q32 46 38 41" fill="none" stroke="#ff9d8a" stroke-width="3" stroke-linecap="round"/>',
+  think: '<path d="M23 41 L41 41" fill="none" stroke="#3a1a10" stroke-width="3.2" stroke-linecap="round"/><circle cx="50" cy="12" r="2.4" fill="#fff"/><circle cx="56" cy="6" r="1.6" fill="#fff"/>',
+  encourage: '<path d="M22 43 Q30 43 42 35" fill="none" stroke="#3a1a10" stroke-width="3.2" stroke-linecap="round"/>',
+};
+const MASCOT_LINES = {
+  id: {
+    done: ["Mantap! Otakmu baru saja menabung kata.", "Hebat, besok tinggal ulang sebentar.", "Satu sesi lagi beres. Jiayou! 加油!", "Keren! Nada bangga sama kamu."],
+    perfect: ["Sempurna! 太棒了!", "Semua benar, luar biasa!"],
+    tryAgain: ["Tidak apa-apa, salah itu bagian dari belajar.", "Hampir! Kata yang salah akan muncul lagi lebih cepat."],
+    noDue: ["Semua kartu aman. Mau tambah kata baru?"],
+    welcome: ["Halo! Aku Nada. Yuk mulai dari kata yang sudah kamu kenal: bakmi, bakpao…"],
+  },
+  en: {
+    done: ["Nice! Your brain just banked some words.", "Great, tomorrow is a quick top-up.", "Another session done. Jiayou! 加油!", "Awesome! Nada is proud of you."],
+    perfect: ["Perfect! 太棒了!", "All correct, amazing!"],
+    tryAgain: ["That's fine, mistakes are how you learn.", "Close! Missed words come back sooner."],
+    noDue: ["All cards are safe. Want some new words?"],
+    welcome: ["Hi! I'm Nada. Let's start from words you already know: bakmi, bakpao…"],
+  },
+};
+
+function mascotLine(kind) {
+  const lines = (MASCOT_LINES[state.lang] || MASCOT_LINES.id)[kind] || [];
+  return lines.length ? lines[Math.floor(Math.random() * lines.length)] : "";
+}
+
+function mascotSvg(mood = "happy", size = 72) {
+  const mouth = MASCOT_MOUTHS[mood] || MASCOT_MOUTHS.happy;
+  const brows = mood === "think" ? '<path d="M17 17 L27 15" stroke="#3a1a10" stroke-width="2.4" stroke-linecap="round"/>' : "";
+  return `<svg class="mascot mascot-${mood}" width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M10 6 H54 A8 8 0 0 1 62 14 V44 A8 8 0 0 1 54 52 H30 L18 62 V52 H10 A8 8 0 0 1 2 44 V14 A8 8 0 0 1 10 6 Z" fill="var(--accent, #c8452a)"/>
+    <ellipse cx="24" cy="26" rx="5" ry="6" fill="#fff"/><ellipse cx="40" cy="26" rx="5" ry="6" fill="#fff"/>
+    <circle cx="25" cy="27" r="2.6" fill="#3a1a10"/><circle cx="41" cy="27" r="2.6" fill="#3a1a10"/>
+    <circle cx="14" cy="36" r="3" fill="#ff9d8a" opacity=".7"/><circle cx="50" cy="36" r="3" fill="#ff9d8a" opacity=".7"/>
+    ${brows}${mouth}
+  </svg>`;
+}
+
+function mascotSay(mood, text, size = 64) {
+  return `<div class="mascot-say">${mascotSvg(mood, size)}<div class="say-bubble">${esc(text)}</div></div>`;
 }
 
 // ---------- Home ----------
@@ -1093,7 +1140,7 @@ function renderHome() {
   const weakest = weakestTone();
 
   view.innerHTML = `
-    <div class="row"><h1>${t("greeting")}</h1><span class="spacer"></span>
+    <div class="row">${mascotSvg(goalPct >= 1 ? "cheer" : "happy", 44)}<h1>${t("greeting")}</h1><span class="spacer"></span>
       <a href="#me" class="btn ghost small" aria-label="${t("settings")}">⚙️</a></div>
     <div class="card hero">
       <svg width="84" height="84" viewBox="0 0 84 84" role="img" aria-label="${t("dailyGoal")} ${Math.round(goalPct * 100)}%">
@@ -1245,22 +1292,65 @@ function renderVocab() {
   renderList();
 }
 
+// Example for a word: hand-written EXAMPLES first, then Tatoeba (CC BY 2.0 FR) sentences that use only HSK words
+// at or below the word's level. Returns [hanzi, pinyin, indonesian, english, tatoebaId|null].
+function exampleFor(word) {
+  if (EXAMPLES[word.hanzi]) {
+    const ex = EXAMPLES[word.hanzi];
+    return [ex[0], ex[1], ex[2], ex[3], null];
+  }
+  const rows = typeof TATOEBA !== "undefined" ? TATOEBA[word.hanzi] : null;
+  return rows && rows.length ? rows[0] : null;
+}
+
+function exampleTranslation(ex) {
+  if (state.lang === "id") {
+    return ex[2] ? esc(ex[2]) : `${esc(ex[3])} <span class="pill tiny">EN</span>`;
+  }
+  return esc(ex[3] || ex[2]);
+}
+
+let tatoebaTokens = null;
+// Native audio for a Tatoeba sentence: chain the recorded/composed audio of its HSK words.
+function composedSentencePlan(text) {
+  if (typeof TATOEBA === "undefined") {
+    return null;
+  }
+  if (!tatoebaTokens) {
+    tatoebaTokens = new Map();
+    Object.values(TATOEBA).forEach((rows) => rows.forEach((row) => tatoebaTokens.set(row[0], row[5])));
+  }
+  const tokens = tatoebaTokens.get(text);
+  if (!tokens) {
+    return null;
+  }
+  const parts = [];
+  for (const token of tokens.split(" ")) {
+    const word = BY_HANZI.get(token);
+    if (!word || !word.audio) {
+      return null;
+    }
+    parts.push(word.audio === 1 ? `w/${token}` : word.audio);
+  }
+  return parts.join("|");
+}
+
 function wordCardHtml(word, withExample = true) {
-  const ex = EXAMPLES[word.hanzi];
+  const ex = exampleFor(word);
   return `
     <div class="hanzi-big">${coloredHanzi(word)}</div>
     <div class="pinyin">${coloredPinyin(word)}</div>
     <div class="meaning">${esc(gloss(word))}<small>${esc(glossOther(word))}</small></div>
     <div class="center" style="margin-top:10px"><button class="btn ghost small" data-say="${esc(word.hanzi)}" aria-label="${t("listen")} ${esc(word.hanzi)}">🔊 ${t("listen")}</button>
       <span class="pill tiny">HSK ${word.level}</span></div>
-    ${withExample && ex ? `<button class="example" data-say="${esc(ex[0])}" aria-label="${t("listen")}: ${esc(ex[0])}"><div class="zh">${zh(ex[0])} 🔊</div><div class="py">${ex[1]}</div><div>${esc(state.lang === "id" ? ex[2] : ex[3])}</div></button>` : ""}`;
+    ${withExample && ex ? `<button class="example" data-say="${esc(ex[0])}" aria-label="${t("listen")}: ${esc(ex[0])}"><div class="zh">${zh(ex[0])} 🔊</div><div class="py">${esc(ex[1])}</div><div>${exampleTranslation(ex)}</div></button>${ex[4] ? `<div class="tiny muted center" style="margin-top:4px">Tatoeba <a href="https://tatoeba.org/sentences/show/${ex[4]}" target="_blank" rel="noopener">#${ex[4]}</a> · CC BY 2.0 FR</div>` : ""}` : ""}`;
 }
 
 // ---------- Learn new words ----------
 function renderLearnSession() {
   const fresh = wordsAtLevel(state.level).filter((w) => !state.cards[w.hanzi]).slice(0, NEW_PER_SESSION);
   if (!fresh.length) {
-    view.innerHTML = `<div class="card center"><h1>🏆 HSK ${state.level}</h1><p>${t("perfect")}</p><a class="btn" href="#me">${t("level")} →</a></div>`;
+    view.innerHTML = `<div class="card center">${mascotSvg("cheer", 88)}<h1>🏆 HSK ${state.level}</h1><p>${t("perfect")}</p><a class="btn" href="#me">${t("level")} →</a></div>`;
     return;
   }
   let step = 0;
@@ -1346,8 +1436,10 @@ function renderLearnSession() {
     }
     addXP(xpGained + 5);
     view.innerHTML = `
-      <div class="card center">
+      <div class="card center pop">
+        ${mascotSvg("cheer", 88)}
         <h1>${t("done")} 🎉</h1>
+        <p class="sub">${esc(mascotLine("done"))}</p>
         <p>${t("xpEarned")}: <b>+${xpGained + 5}</b></p>
         <div class="row wrap" style="justify-content:center">${fresh.map((w) => `<span class="pill ${firstTry.get(w.hanzi) ? "green" : ""}" style="font-size:18px">${zh(w.hanzi)}</span>`).join("")}</div>
       </div>
@@ -1366,7 +1458,7 @@ function renderReviewSession() {
   let doneCount = 0;
   let xpGained = 0;
   if (!total) {
-    view.innerHTML = `<div class="card center"><h1>✅</h1><p>${t("noDue")}</p><a class="btn" href="#learn">${t("learnNew")}</a></div>`;
+    view.innerHTML = `<div class="card center">${mascotSvg("happy", 80)}<p>${t("noDue")}</p><p class="sub">${esc(mascotLine("noDue"))}</p><a class="btn" href="#learn">${t("learnNew")}</a></div>`;
     return;
   }
 
@@ -1377,7 +1469,7 @@ function renderReviewSession() {
       const personalLine = fit.n >= PERSONAL_MIN_REVIEWS
         ? `<p class="sub">🧠 ${t("personalScale")}: <b>${fit.k.toFixed(2)}${t("personalVs")}</b></p>`
         : "";
-      view.innerHTML = `<div class="card center pop"><h1>${t("done")} 🎉</h1><p>${t("xpEarned")}: <b>+${xpGained}</b></p>${personalLine}</div><a class="btn block" href="#home">${t("backHome")}</a>`;
+      view.innerHTML = `<div class="card center pop">${mascotSvg("cheer", 88)}<h1>${t("done")} 🎉</h1><p class="sub">${esc(mascotLine("done"))}</p><p>${t("xpEarned")}: <b>+${xpGained}</b></p>${personalLine}</div><a class="btn block" href="#home">${t("backHome")}</a>`;
       announce(t("done"));
       celebrate();
       return;
@@ -1476,7 +1568,7 @@ function renderToneHear(body, statsHtml) {
     if (round >= words.length) {
       addXP(right);
       body.innerHTML = `${statsHtml(state.tones)}
-        <div class="card center"><h1>${right}/${words.length}</h1><p>${right === words.length ? t("perfect") : t("keepGoing")}</p></div>
+        <div class="card center">${mascotSvg(right === words.length ? "cheer" : "encourage", 80)}<h1>${right}/${words.length}</h1><p>${right === words.length ? t("perfect") : t("keepGoing")}</p><p class="sub">${esc(mascotLine(right === words.length ? "perfect" : "tryAgain"))}</p></div>
         <button class="btn block" id="again">${t("practice")} ↻</button>`;
       document.getElementById("again").onclick = () => renderTones("hear");
       return;
@@ -1553,6 +1645,26 @@ function renderToneHear(body, statsHtml) {
   showRound();
 }
 
+
+// Pilot data: every Tone Mirror attempt is kept on-device as [time, hanzi, syllable, target tone, detected tone (0 = none)].
+const TONE_LOG_MAX = 3000;
+function logToneAttempt(word, target, result) {
+  state.toneLog = state.toneLog || [];
+  state.toneLog.push([Date.now(), word.hanzi, syllableAudioName(word), target, result && result.tone ? result.tone : 0]);
+  if (state.toneLog.length > TONE_LOG_MAX) {
+    state.toneLog.splice(0, state.toneLog.length - TONE_LOG_MAX);
+  }
+  saveState();
+}
+
+function toneLogCsv(log) {
+  const rows = ["timestamp,hanzi,syllable,target_tone,detected_tone,match"];
+  for (const [time, hanzi, syllable, target, detected] of log || []) {
+    rows.push(`${new Date(time).toISOString()},${hanzi},${syllable},${target},${detected},${detected === target ? 1 : 0}`);
+  }
+  return rows.join("\n");
+}
+
 function toneAccuracyNote() {
   return `<p class="small-text muted">🎯 ${t("toneAccuracy")}: ${(TONE_MIRROR_ACCURACY * 100).toFixed(0)}%</p>`;
 }
@@ -1610,6 +1722,7 @@ function renderToneMirror(body, statsHtml) {
       rec.classList.remove("recording");
       const { samples, sampleRate } = await recording.stop();
       const result = classifyTone(pitchTrack(samples, sampleRate));
+      logToneAttempt(word, target, result);
       showResult(result, target);
     };
     rec.addEventListener("pointerdown", start);
@@ -1900,7 +2013,7 @@ function renderTalk(arg) {
       addXP(5 + firstTryRight * 2);
       playSentence(scenario.end[0]);
       document.getElementById("replies").innerHTML = `
-        <div class="card center"><h1>${pct}%</h1><p>${pct === 100 ? t("perfect") : t("keepGoing")}</p></div>
+        <div class="card center">${mascotSvg(pct === 100 ? "cheer" : "encourage", 80)}<h1>${pct}%</h1><p>${pct === 100 ? t("perfect") : t("keepGoing")}</p><p class="sub">${esc(mascotLine(pct === 100 ? "perfect" : "tryAgain"))}</p></div>
         <a class="btn block" href="#talk">${t("next")} →</a>`;
       return;
     }
@@ -2283,6 +2396,7 @@ function renderSettings() {
       <a class="btn block ghost" href="#stats">📊 ${t("stats")}</a>
       <button class="btn block ghost" id="export" style="margin-top:10px">⬇️ ${t("exportData")}</button>
       <button class="btn block ghost" id="csv" style="margin-top:10px">🧪 ${t("studyData")}</button>
+      <button class="btn block ghost" id="csvTones" style="margin-top:10px">🎤 ${t("toneData")} (${(state.toneLog || []).length})</button>
       <label class="btn block ghost" style="margin-top:10px">⬆️ ${t("importData")}<input type="file" id="import" accept="application/json" class="sr-only"></label>
       <button class="btn block" id="reset" style="margin-top:10px">🗑️ ${t("reset")}</button>
     </div>
@@ -2327,6 +2441,7 @@ function renderSettings() {
     }
     download(`nadaku-study-${dateKey(Date.now())}.csv`, rows.join("\n"), "text/csv");
   };
+  document.getElementById("csvTones").onclick = () => download(`nadaku-tones-${dateKey(Date.now())}.csv`, toneLogCsv(state.toneLog), "text/csv");
   document.getElementById("import").onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) {

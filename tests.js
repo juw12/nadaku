@@ -333,9 +333,100 @@
   applyTheme();
   check("dark theme: text colour pairs meet WCAG AA (≥ 4.5:1)", darkLow.length === 0, darkLow.map(([a, b, r]) => `${a}/${b}=${r.toFixed(2)}`).join(", "));
 
+  // ---------- v5: Tatoeba examples, reading fixes, mascot, pilot tone log ----------
+  {
+    const keys = Object.keys(TATOEBA);
+    check("Tatoeba: ≥ 3,500 HSK words have a real example sentence", keys.length >= 3500, keys.length);
+    const badLevel = [];
+    const badJoin = [];
+    const badPinyin = [];
+    let rowCount = 0;
+    for (const [hanzi, rows] of Object.entries(TATOEBA)) {
+      const target = BY_HANZI.get(hanzi);
+      for (const row of rows) {
+        rowCount += 1;
+        const tokens = row[5].split(" ");
+        if (!target || !tokens.includes(hanzi) || tokens.some((tok) => !BY_HANZI.get(tok) || BY_HANZI.get(tok).level > target.level)) {
+          badLevel.push(`${hanzi}:${row[0]}`);
+        }
+        if (tokens.join("") !== (row[0].match(HAN) || []).join("")) {
+          badJoin.push(row[0]);
+        }
+        const flat = row[1].toLowerCase().replace(/[^a-zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü]/g, "");
+        const missing = tokens.filter((tok) => tok.length > 1 && !flat.includes(BY_HANZI.get(tok).pinyin.toLowerCase().replace(/[^a-zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü]/g, "")));
+        if (missing.length) {
+          badPinyin.push(`${row[0]}(${missing.join(",")})`);
+        }
+      }
+    }
+    check(`Tatoeba: every sentence uses only HSK words at or below the target word's level (${rowCount} rows)`, badLevel.length === 0, badLevel.slice(0, 4).join(" | "));
+    check("Tatoeba: word segmentation covers every character of the sentence", badJoin.length === 0, badJoin.slice(0, 4).join(" | "));
+    check("Tatoeba: sentence pinyin contains each multi-character word's verified pinyin", badPinyin.length === 0, badPinyin.slice(0, 4).join(" | "));
+    const noCredit = Object.values(TATOEBA).flat().filter((row) => !(row[4] > 0) || !(row[2] || row[3]));
+    check("Tatoeba: every row keeps its sentence id (attribution) and a translation", noCredit.length === 0, noCredit.length);
+
+    const ex = exampleFor(BY_HANZI.get("该"));
+    check("exampleFor falls back to Tatoeba when there is no hand-written example", ex && ex[4] > 0 && ex[0].includes("该"), ex && ex[0]);
+    const hand = Object.keys(EXAMPLES)[0];
+    check("exampleFor prefers the hand-written example", exampleFor(BY_HANZI.get(hand))[0] === EXAMPLES[hand][0], hand);
+
+    const sample = Object.values(TATOEBA).flat().slice(0, 300);
+    const unvoiced = sample.filter((row) => !composedSentencePlan(row[0]));
+    check("Tatoeba sentences get native audio chained from their words (300 sampled)", unvoiced.length === 0, unvoiced.slice(0, 3).map((r) => r[0]).join(" "));
+
+    const keepLang = state.lang;
+    state.lang = "id";
+    const englishOnly = Object.values(TATOEBA).flat().find((row) => !row[2]);
+    const idHtml = exampleTranslation(englishOnly);
+    state.lang = keepLang;
+    check("Indonesian UI marks English-only example translations with an EN pill", idHtml.includes(">EN<"), englishOnly[3]);
+  }
+  {
+    const expected = { "没": ["méi", ""], "吧": ["ba", ""], "行": ["xíng", ""], "雨": ["yǔ", "hujan"], "胖": ["pàng", "gemuk"], "重": ["zhòng", "berat"], "老公": ["lǎo gōng", "suami"] };
+    const wrong = Object.entries(expected).filter(([h, [py, idWord]]) => {
+      const word = BY_HANZI.get(h);
+      return !word || word.pinyin !== py || (idWord && !word.id.includes(idWord));
+    });
+    check("v5 reading fixes: 没 méi, 吧 ba, 行 xíng, 雨 yǔ (hujan), 胖 pàng, 重 zhòng, 老公 suami", wrong.length === 0, wrong.map(([h]) => `${h}:${BY_HANZI.get(h)?.pinyin}/${BY_HANZI.get(h)?.id}`).join(" | "));
+    check("老公 no longer glossed as 'eunuch'", !/eunuch|kasim/i.test(BY_HANZI.get("老公").en + BY_HANZI.get("老公").id), BY_HANZI.get("老公").en);
+  }
+  {
+    const moods = ["happy", "cheer", "think", "encourage"];
+    const host = document.createElement("div");
+    host.innerHTML = moods.map((m) => mascotSvg(m, 48)).join("");
+    const svgs = host.querySelectorAll("svg.mascot");
+    check("mascot Nada renders an SVG for each of 4 moods", svgs.length === 4 && [...svgs].every((s) => s.getAttribute("aria-hidden") === "true"), svgs.length);
+    const keepLang = state.lang;
+    const lineKinds = ["welcome", "done", "perfect", "tryAgain", "noDue"];
+    const empty = [];
+    for (const lang of ["id", "en"]) {
+      state.lang = lang;
+      lineKinds.forEach((kind) => {
+        if (MASCOT_LINES[lang][kind] && !mascotLine(kind)) {
+          empty.push(`${lang}.${kind}`);
+        }
+      });
+    }
+    state.lang = keepLang;
+    const kindsId = Object.keys(MASCOT_LINES.id).sort().join();
+    const kindsEn = Object.keys(MASCOT_LINES.en).sort().join();
+    check("mascot lines exist in both languages with the same moments", kindsId === kindsEn && empty.length === 0, `${kindsId} vs ${kindsEn} ${empty.join(" ")}`);
+  }
+  {
+    const csv = toneLogCsv([[Date.UTC(2026, 0, 2), "妈", "ma1", 1, 1], [Date.UTC(2026, 0, 2, 0, 1), "马", "ma3", 3, 2]]);
+    const rows = csv.split("\n");
+    check("tone practice CSV: header + one row per attempt with a match flag", rows.length === 3 && rows[0].startsWith("timestamp,") && rows[1].endsWith(",1,1,1") && rows[2].endsWith(",3,2,0"), rows.join(" / "));
+    const keepLog = state.toneLog;
+    state.toneLog = new Array(TONE_LOG_MAX).fill([0, "妈", "ma1", 1, 1]);
+    logToneAttempt(BY_HANZI.get("妈") || { hanzi: "妈", pinyin: "mā" }, 1, { tone: 1 });
+    const capped = state.toneLog.length === TONE_LOG_MAX && state.toneLog[TONE_LOG_MAX - 1][1] === "妈" && state.toneLog[TONE_LOG_MAX - 1][0] > 0;
+    state.toneLog = keepLog;
+    check(`tone practice log is capped at ${TONE_LOG_MAX} attempts (oldest dropped)`, capped, "");
+  }
+
   state = JSON.parse(saved);
 
   const failed = results.filter((r) => !r.pass);
   document.title = failed.length ? `TESTS FAIL ${failed.length}/${results.length}` : `TESTS PASS ${results.length}/${results.length}`;
-  view.innerHTML = `<pre id="test-results">${results.map((r) => `${r.pass ? "PASS" : "FAIL"}  ${r.name}${r.detail ? "  [" + r.detail + "]" : ""}`).join("\n")}\n\n${document.title}</pre>`;
+  view.innerHTML = `<pre id="test-results">${results.map((r) => esc(`${r.pass ? "PASS" : "FAIL"}  ${r.name}${r.detail ? "  [" + r.detail + "]" : ""}`)).join("\n")}\n\n${document.title}</pre>`;
 })();

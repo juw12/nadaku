@@ -1157,6 +1157,7 @@ function renderExamResult() {
         <div class="rs-row"><span>${sectionName(s.id)}</span><span class="rs-bar"><span style="width:${attempt.scores[s.id]}%"></span></span><b>${attempt.scores[s.id]}</b></div>`).join("")}</div>
       ${hasWriting ? `<p class="small muted">${et("estimated")}</p>` : ""}
     </section>
+    ${typeof guideNextHtml === "function" ? guideNextHtml() : ""}
     <section class="card">
       <h2 class="h3">${et("perPart")}</h2>
       <table class="paper-table"><tbody>${rows.map((r) => {

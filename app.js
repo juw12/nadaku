@@ -191,6 +191,9 @@ function addXP(amount) {
   state.xp += amount;
   const key = dateKey(Date.now());
   state.days[key] = (state.days[key] || 0) + amount;
+  if (typeof guideRecord === "function") {
+    guideRecord(amount);
+  }
   saveState();
   updateTopbar();
 }
@@ -1060,7 +1063,11 @@ function route() {
   document.body.classList.remove("exam-focus");
   view.innerHTML = "";
   window.scrollTo(0, 0);
+  document.body.dataset.route = screens[name] ? name : "home";
   screen(arg);
+  if (typeof guideMountFab === "function") {
+    guideMountFab(screens[name] ? name : "home");
+  }
   const heading = view.querySelector("h1");
   if (heading) {
     heading.setAttribute("tabindex", "-1");
@@ -1142,11 +1149,34 @@ function mascotLine(kind) {
 }
 
 function mascotSvg(mood = "happy", size = 72) {
-  // Nada, drawn as the app's seal: a vermilion chop stamp with the character 调 (tone). No cartoon face.
+  // Nada: a steamed bun (bakpao, a word Indonesian learners already know) with the app's seal-red dot on top.
+  const eyes = mood === "cheer"
+    ? '<path d="M21.5 38.5 Q24 35 26.5 38.5" class="m-ink" fill="none" stroke-width="2.4" stroke-linecap="round"/><path d="M37.5 38.5 Q40 35 42.5 38.5" class="m-ink" fill="none" stroke-width="2.4" stroke-linecap="round"/>'
+    : `<ellipse cx="24" cy="${mood === "think" ? 36.6 : 37.6}" rx="2.6" ry="3.1" class="m-ink-fill"/><ellipse cx="40" cy="${mood === "think" ? 36.6 : 37.6}" rx="2.6" ry="3.1" class="m-ink-fill"/>
+       <circle cx="24.9" cy="${mood === "think" ? 35.4 : 36.4}" r="0.95" fill="#fff"/><circle cx="40.9" cy="${mood === "think" ? 35.4 : 36.4}" r="0.95" fill="#fff"/>`;
+  const mouths = {
+    happy: '<path d="M28.6 43.2 Q32 46.6 35.4 43.2" class="m-ink" fill="none" stroke-width="2" stroke-linecap="round"/>',
+    cheer: '<path d="M28 42.4 Q32 49.5 36 42.4 Z" class="m-mouth"/>',
+    think: '<path d="M29.5 44.4 Q32 43.2 34.5 44.4" class="m-ink" fill="none" stroke-width="2" stroke-linecap="round"/>',
+    encourage: '<path d="M28.4 43 Q32 47.6 35.6 43" class="m-ink" fill="none" stroke-width="2.2" stroke-linecap="round"/>',
+  };
+  const steam = mood === "think" ? "" : '<path d="M27 11.5 C25.4 9.6 28.4 7.8 26.8 5.6" class="m-steam"/><path d="M37 11.5 C35.4 9.6 38.4 7.8 36.8 5.6" class="m-steam"/>';
+  const extra = {
+    think: '<circle cx="53" cy="18" r="2.2" class="m-dot"/><circle cx="58" cy="11.5" r="1.5" class="m-dot"/>',
+    cheer: '<path d="M12 19 L15.5 21.5 M9 27 L13 27.3 M52 19 L48.5 21.5 M55 27 L51 27.3" class="m-spark"/><path d="M7.5 41 Q3.5 35.5 6.5 31" class="m-arm" fill="none" stroke-width="3.6" stroke-linecap="round"/><path d="M56.5 41 Q60.5 35.5 57.5 31" class="m-arm" fill="none" stroke-width="3.6" stroke-linecap="round"/>',
+    encourage: '<path d="M56 43 Q61 40 59.5 34.5" class="m-arm" fill="none" stroke-width="3.6" stroke-linecap="round"/>',
+    happy: "",
+  };
   return `<svg class="mascot mascot-${mood}" width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true">
-    <rect x="4" y="4" width="56" height="56" rx="6" fill="var(--seal, #a8321f)"/>
-    <rect x="9" y="9" width="46" height="46" rx="3" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.5"/>
-    <text x="32" y="44" text-anchor="middle" font-size="32" fill="#fff" font-family="Kaiti SC, STKaiti, KaiTi, serif">调</text>
+    <ellipse cx="32" cy="58.5" rx="19" ry="3" class="m-shadow"/>
+    ${steam}
+    ${extra[mood] || ""}
+    <path d="M8 45 C8 27 19.5 15 32 15 C44.5 15 56 27 56 45 C56 53 47 57 32 57 C17 57 8 53 8 45 Z" class="m-body"/>
+    <path d="M32 16.5 C30.4 20.5 27.6 22.6 23.8 23.6 M32 16.5 C33.6 20.5 36.4 22.6 40.2 23.6 M32 16.5 L32 22" class="m-pleat" fill="none" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="32" cy="27.4" r="2.7" class="m-seal"/>
+    <ellipse cx="18.6" cy="44" rx="3.6" ry="2.1" class="m-blush"/><ellipse cx="45.4" cy="44" rx="3.6" ry="2.1" class="m-blush"/>
+    ${eyes}
+    ${mouths[mood] || mouths.happy}
   </svg>`;
 }
 
@@ -1160,7 +1190,6 @@ function renderHome() {
   const todayXp = state.days[dateKey(now)] || 0;
   const goalPct = Math.min(1, todayXp / state.goal);
   const learnedCount = Object.keys(state.cards).length;
-  const due = dueWords(now).length;
   const memory = memoryScore(now);
   const memory7 = memoryScore(now + 7 * DAY);
   const strong = Object.values(state.cards).filter((c) => retention(c, now) >= 0.9).length;
@@ -1180,73 +1209,54 @@ function renderHome() {
     const key = dateKey(now - d * DAY);
     week.push({ label: new Date(now - d * DAY).toLocaleDateString(state.lang === "id" ? "id-ID" : "en-US", { weekday: "short" }), xp: state.days[key] || 0 });
   }
-  const weekMax = Math.max(state.goal, ...week.map((w) => w.xp));
-  const weakest = weakestTone();
 
   view.innerHTML = `
     <div class="row page-head"><h1>${t("greeting")}</h1><span class="spacer"></span>
       <a href="#me" class="icon-btn" aria-label="${t("settings")}">${icon("settings")}</a></div>
-    <div class="card hero">
-      <svg width="84" height="84" viewBox="0 0 84 84" role="img" aria-label="${t("dailyGoal")} ${Math.round(goalPct * 100)}%">
-        <circle class="ring-track" cx="42" cy="42" r="34" stroke-width="8" fill="none"/>
-        <circle class="ring-fill" cx="42" cy="42" r="34" stroke-width="8" fill="none" stroke-linecap="round"
-          stroke-dasharray="${circumference}" stroke-dashoffset="${circumference * (1 - goalPct)}" transform="rotate(-90 42 42)"/>
-        <text class="ring-text" x="42" y="48" text-anchor="middle" font-size="17" font-weight="600">${Math.round(goalPct * 100)}%</text>
-      </svg>
-      <div>
-        <div class="label">${t("dailyGoal")}</div>
-        <div class="big">${todayXp}/${state.goal} XP</div>
-        <div class="label">${streakDays()} ${t("streak")}</div>
-      </div>
-    </div>
+    <div class="home-grid">
+    <div class="home-main">${guideCardHtml(now)}</div>
+    <aside class="home-side">
+    <section class="card home-stats" aria-label="${t("dailyGoal")}">
+      <a class="hs-item" href="#stats">
+        <svg width="44" height="44" viewBox="0 0 84 84" role="img" aria-label="${t("dailyGoal")} ${Math.round(goalPct * 100)}%">
+          <circle class="ring-track" cx="42" cy="42" r="34" stroke-width="10" fill="none"/>
+          <circle class="ring-fill" cx="42" cy="42" r="34" stroke-width="10" fill="none" stroke-linecap="round"
+            stroke-dasharray="${circumference}" stroke-dashoffset="${circumference * (1 - goalPct)}" transform="rotate(-90 42 42)"/>
+        </svg>
+        <span><b>${todayXp}/${state.goal}</b><small>${t("dailyGoal")}</small></span>
+      </a>
+      <a class="hs-item" href="#stats">
+        <span class="hs-num">${streakDays()}</span>
+        <span><b>${t("streak")}</b><small>${week.filter((w) => w.xp > 0).length}/7</small></span>
+      </a>
+      <a class="hs-item" href="#me">
+        <span class="hs-num">${levelLearned}</span>
+        <span><b>HSK ${state.level}</b><small>/ ${levelWords.length}</small></span>
+      </a>
+    </section>
 
-    <div class="grid2">
-      <a class="card tile primary" href="#review"><span class="ic">${icon("review", 22)}</span><b>${t("reviewNow")}</b><span>${due} ${t("reviewDesc")}</span></a>
-      <a class="card tile" href="#learn"><span class="ic">${icon("plus", 22)}</span><b>${t("learnNew")}</b><span>${t("newDesc")}</span></a>
-      <a class="card tile" href="#tones"><span class="ic">${icon("tone", 22)}</span><b>${t("tones")}</b><span>${weakest ? `${t("weakTone")}: ${weakest}` : t("toneDesc")}</span></a>
-      <a class="card tile" href="#talk"><span class="ic">${icon("chat", 22)}</span><b>${t("talk")}</b><span>${t("talkDesc")}</span></a>
-    </div>
-
-    <a class="card row level-card" href="#me" style="text-decoration:none;color:inherit">
-      <span class="pill blue">HSK ${state.level}</span>
-      <div style="flex:1"><div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="${levelWords.length}" aria-valuenow="${levelLearned}" aria-label="HSK ${state.level}"><i style="width:${(levelLearned / levelWords.length) * 100}%;background:var(--t4)"></i></div></div>
-      <span class="muted small-text">${levelLearned}/${levelWords.length}</span>
-    </a>
-
-    <div class="card">
+    <div class="card memory-card">
       <div class="row"><b>${t("memoryTitle")}</b><span class="spacer"></span><span class="pill green">${t("strong")}: ${strong}</span></div>
-      <div class="row" style="align-items:baseline;margin-top:6px"><span style="font-size:38px;font-weight:800">${memory.toFixed(0)}</span><span class="muted">&nbsp;/ ${learnedCount} ${t("memoryNow")}</span></div>
-      <svg viewBox="0 0 300 95" width="100%" height="95" style="margin-top:4px" role="img" aria-label="${t("in7")} ${memory7.toFixed(0)}">
+      <div class="row" style="align-items:baseline;margin-top:6px"><span class="memory-num">${memory.toFixed(0)}</span><span class="muted">&nbsp;/ ${learnedCount} ${t("memoryNow")}</span></div>
+      <svg viewBox="0 0 300 95" width="100%" height="80" preserveAspectRatio="none" style="margin-top:4px" role="img" aria-label="${t("in7")} ${memory7.toFixed(0)}">
         <line x1="0" y1="10" x2="300" y2="10" stroke="var(--line)" stroke-dasharray="4 4"/>
-        <polyline points="0,90 ${points} 300,90" fill="rgba(232,69,60,.10)" stroke="none"/>
-        <polyline points="${points}" fill="none" stroke="var(--red)" stroke-width="3"/>
+        <polyline points="0,90 ${points} 300,90" fill="var(--soft)" stroke="none"/>
+        <polyline points="${points}" fill="none" stroke="var(--red)" stroke-width="2.5"/>
         <text x="0" y="8" font-size="9" fill="var(--muted)">${learnedCount}</text>
         <text x="300" y="94" font-size="9" fill="var(--muted)" text-anchor="end">+14${t("days")}</text>
       </svg>
-      <p class="sub" style="margin:4px 0 0">${t("in7")} <b>${memory7.toFixed(0)}</b>. ${t("memoryDesc")} <a href="#stats">${t("stats")} →</a></p>
-    </div>
-
-    <div class="grid3">
-      <div class="card stat"><b>${learnedCount}</b><span>${t("learned")}</span></div>
-      <div class="card stat"><b class="${due ? "bad" : "ok"}">${due}</b><span>${t("due")}</span></div>
-      <div class="card stat"><b>${VOCAB.length}</b><span>HSK 1–6</span></div>
+      <p class="sub" style="margin:4px 0 0">${t("in7")} <b>${memory7.toFixed(0)}</b>. ${t("memoryDesc")} <a href="#stats">${t("stats")}</a></p>
     </div>
 
     <a class="card row indo-card" href="#indo">
       <span class="ic" aria-hidden="true">${FLAG_ID}</span>
       <div style="flex:1"><b>${t("indoTitle")}</b><div class="muted small-text">${t("indoDesc")}</div></div>
-      <span aria-hidden="true">→</span>
+      <span aria-hidden="true">${icon("arrow", 18)}</span>
     </a>
 
-    
-
-    <div class="card">
-      <b>${t("week")}</b>
-      <div class="bars" role="img" aria-label="${week.map((w) => `${w.label} ${w.xp} XP`).join(", ")}">
-        ${week.map((w) => `<div class="bar"><i style="height:${Math.max(3, (w.xp / weekMax) * 70)}px"></i>${w.label}</div>`).join("")}
-      </div>
-    </div>
-    <p class="sub center offline-note">${icon("offline", 16)} ${t("offline")}</p>`;
+    <p class="sub center offline-note">${icon("offline", 16)} ${t("offline")}</p>
+    </aside>
+    </div>`;
 }
 
 function weakestTone() {
@@ -1304,11 +1314,11 @@ function renderVocab() {
       return `<button class="list-item" data-say="${esc(w.hanzi)}" aria-label="${esc(w.hanzi)} ${esc(w.pinyin)}, ${esc(gloss(w))}">
         <div class="zh">${coloredHanzi(w)}</div>
         <div style="flex:1;text-align:left">
-          <div>${coloredPinyin(w)} <span class="pill tiny">HSK ${w.level}</span></div>
+          <div>${coloredPinyin(w)}${w.level !== level ? ` <span class="pill tiny">HSK ${w.level}</span>` : ""}</div>
           <div class="muted" style="font-size:13px">${esc(gloss(w))}</div>
           ${card ? `<div class="meter" style="margin-top:6px"><i style="width:${r * 100}%;background:${color}"></i></div>` : ""}
         </div>
-        ${card ? `<span class="pill green">${Math.round(r * 100)}%</span>` : `<span class="pill">${t("notLearned")}</span>`}
+        ${card ? `<span class="v-pct">${Math.round(r * 100)}%</span>` : `<span class="pill">${t("notLearned")}</span>`}
       </button>`;
     }).join("") + (items.length > shown ? `<button class="btn ghost block" id="more">${t("more")} (${items.length - shown})</button>` : "");
     listEl.querySelectorAll("[data-say]").forEach((el) => el.addEventListener("click", () => playAny(el.dataset.say)));
@@ -1492,7 +1502,8 @@ function renderLearnSession() {
         <p>${t("xpEarned")}: <b>+${xpGained + 5}</b></p>
         <div class="row wrap" style="justify-content:center">${fresh.map((w) => `<span class="pill ${firstTry.get(w.hanzi) ? "green" : ""}" style="font-size:18px">${zh(w.hanzi)}</span>`).join("")}</div>
       </div>
-      <a class="btn block" href="#home">${t("backHome")}</a>`;
+      ${guideNextHtml()}
+      <a class="btn block ghost" href="#home">${t("backHome")}</a>`;
     announce(t("done"));
     celebrate();
   }
@@ -1518,7 +1529,7 @@ function renderReviewSession() {
       const personalLine = fit.n >= PERSONAL_MIN_REVIEWS
         ? `<p class="sub">${t("personalScale")}: <b>${fit.k.toFixed(2)}${t("personalVs")}</b></p>`
         : "";
-      view.innerHTML = `<div class="card center pop">${mascotSvg("cheer", 88)}<h1>${t("done")}</h1><p class="sub">${esc(mascotLine("done"))}</p><p>${t("xpEarned")}: <b>+${xpGained}</b></p>${personalLine}</div><a class="btn block" href="#home">${t("backHome")}</a>`;
+      view.innerHTML = `<div class="card center pop">${mascotSvg("cheer", 88)}<h1>${t("done")}</h1><p class="sub">${esc(mascotLine("done"))}</p><p>${t("xpEarned")}: <b>+${xpGained}</b></p>${personalLine}</div>${guideNextHtml()}<a class="btn block ghost" href="#home">${t("backHome")}</a>`;
       announce(t("done"));
       celebrate();
       return;
@@ -1618,7 +1629,8 @@ function renderToneHear(body, statsHtml) {
       addXP(right);
       body.innerHTML = `${statsHtml(state.tones)}
         <div class="card center">${mascotSvg(right === words.length ? "cheer" : "encourage", 80)}<h1>${right}/${words.length}</h1><p>${right === words.length ? t("perfect") : t("keepGoing")}</p><p class="sub">${esc(mascotLine(right === words.length ? "perfect" : "tryAgain"))}</p></div>
-        <button class="btn block" id="again">${icon("restart", 18)} ${t("practice")}</button>`;
+        ${guideNextHtml()}
+        <button class="btn block ghost" id="again">${icon("restart", 18)} ${t("practice")}</button>`;
       document.getElementById("again").onclick = () => renderTones("hear");
       return;
     }
@@ -2063,7 +2075,8 @@ function renderTalk(arg) {
       playSentence(scenario.end[0]);
       document.getElementById("replies").innerHTML = `
         <div class="card center">${mascotSvg(pct === 100 ? "cheer" : "encourage", 80)}<h1>${pct}%</h1><p>${pct === 100 ? t("perfect") : t("keepGoing")}</p><p class="sub">${esc(mascotLine(pct === 100 ? "perfect" : "tryAgain"))}</p></div>
-        <a class="btn block" href="#talk">${t("next")} →</a>`;
+        ${guideNextHtml()}
+        <a class="btn block ghost" href="#talk">${t("next")} →</a>`;
       return;
     }
     playSentence(current.bot[0]);
@@ -2282,6 +2295,7 @@ function runExam() {
         <div class="card center"><div style="font-size:52px;font-weight:800">${score}<span class="muted" style="font-size:20px"> ${t("ofTen")}</span></div>
         <p>${t("readiness")}: <b>${score * 10}%</b></p>
         <div class="row wrap" style="justify-content:center">${missed.map((w) => `<span class="pill" style="font-size:18px">${zh(w.hanzi)} ${w.pinyin}</span>`).join("")}</div></div>
+        ${guideNextHtml()}
         ${missed.length ? `<button class="btn block" id="add">${t("addMissed")}</button>` : ""}
         <a class="btn block ghost" style="margin-top:10px" href="#exam/quick">${icon("restart", 18)} ${t("retake")}</a>`;
       announce(`${t("result")}: ${score} ${t("ofTen")}`);

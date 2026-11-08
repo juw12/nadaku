@@ -589,6 +589,86 @@
     check("exam routes render: home, quick quiz, exam/go (focus mode, no tab bar), result with collapsible review", routeErrors.length === 0, routeErrors.join(", "));
   }
 
+
+  // ---------- v8: Nada the guide (rule-based queue, offline) ----------
+  {
+    const now = Date.now();
+    const today = dateKey(now);
+    const keepActivity = state.activity;
+    const keepHash = location.hash;
+    const keepOnboarded = state.onboarded;
+    state.onboarded = true;
+    state.activity = {};
+
+    const due = dueWords(now).length;
+    const fresh = guideSummary(now);
+    check("guide: today's queue is ordered, review comes first when cards are due, and one next step is shown",
+      fresh.steps.length >= 3 && (due === 0 || fresh.steps[0].id === "review") && fresh.next === fresh.steps[0] && fresh.done === 0,
+      `${due} due, ${fresh.steps.map((s) => s.id).join(">")}`);
+
+    location.hash = "tones";
+    guideRecord(3, now);
+    location.hash = "home";
+    guideRecord(50, now);
+    check("guide: XP is credited to the screen it was earned on (tones +3, home ignored)",
+      state.activity[today].tones === 3 && state.activity[today].home === undefined, JSON.stringify(state.activity[today]));
+
+    state.activity[today] = { review: 1 };
+    const afterReview = guideSummary(now);
+    check("guide: finishing a session advances the queue to the next step",
+      afterReview.steps[0].done && afterReview.next && afterReview.next.id === afterReview.steps[1].id && afterReview.done === 1,
+      afterReview.steps.map((s) => `${s.id}:${s.done}`).join(" "));
+
+    state.activity[today] = { review: 99, learn: 99, tones: 99, write: 99, talk: 99, exam: 99 };
+    const empty = guideSummary(now);
+    const doneCard = document.createElement("div");
+    doneCard.innerHTML = guideCardHtml(now) + guideNextHtml(now);
+    check("guide: keeps going until the queue is empty, then shows an all-done state",
+      empty.next === null && empty.left === 0 && !!doneCard.querySelector(".guide-done") && !doneCard.querySelector(".guide-next")
+      && doneCard.querySelector(".guide-after").textContent.includes(gt("allDoneTitle")), `${empty.left} left`);
+
+    state.activity[today] = {};
+    location.hash = "home";
+    route();
+    const homeGuide = view.querySelector(".guide");
+    check("guide: home leads with Nada's plan card, a next-step button with its reason, and the step list",
+      !!homeGuide && view.querySelector(".card") === homeGuide && !!homeGuide.querySelector("a.guide-next[href^='#']")
+      && !!homeGuide.querySelector(".guide-why") && homeGuide.querySelectorAll(".guide-steps li").length === fresh.steps.length
+      && !!homeGuide.querySelector("svg.mascot[aria-hidden='true']"));
+
+    const strip = document.createElement("div");
+    strip.innerHTML = guideNextHtml(now);
+    const go = strip.querySelector(".guide-after-go");
+    check("guide: session-complete strip hands off to the next queued step",
+      !!go && go.getAttribute("href") === guideSummary(now).next.href, go ? go.getAttribute("href") : "none");
+
+    guideMountFab("vocab", true);
+    const fab = document.getElementById("nada-fab");
+    let sheetOk = false;
+    if (fab) {
+      fab.click();
+      const sheet = document.getElementById("nada-sheet");
+      sheetOk = !!sheet && !!sheet.querySelector("[role='dialog'][aria-modal='true']") && !!sheet.querySelector(".guide-tip")
+        && !!sheet.querySelector(".guide-honest");
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      sheetOk = sheetOk && !document.getElementById("nada-sheet");
+    }
+    const fabOk = !!fab && fab.getAttribute("aria-label") && fab.querySelector(".nada-badge");
+    guideMountFab("home", true);
+    check("guide: floating Nada on other screens opens a labelled sheet (tip, queue, honesty note) that closes on Escape; hidden on home",
+      fabOk && sheetOk && !document.getElementById("nada-fab"));
+
+    const copy = JSON.stringify(GUIDE_TEXT).toLowerCase();
+    const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
+    check("guide: copy is honest (rule-based, offline, no server AI claim) and has no emoji",
+      GUIDE_TEXT.id.honest.includes("offline") && GUIDE_TEXT.en.honest.toLowerCase().includes("offline")
+      && !/(chatgpt|gpt-|llm|cloud ai|powered by ai|ditenagai ai)/.test(copy) && !emoji.test(copy));
+
+    state.activity = keepActivity;
+    state.onboarded = keepOnboarded;
+    location.hash = keepHash;
+  }
+
   state = JSON.parse(saved);
 
   const failed = results.filter((r) => !r.pass);

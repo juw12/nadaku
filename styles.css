@@ -773,3 +773,139 @@ a.btn, a.btn:hover, .btn u { text-decoration: none; }
 .level-chips { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin: 12px 0; }
 .level-chips .chip { justify-content: center; padding-left: 0; padding-right: 0; white-space: nowrap; }
 .chip svg, .btn svg { flex: none; }
+
+
+/* ======== v8: Nada the guide (bakpao mascot, today's queue, floating helper) ======== */
+.m-shadow { fill: rgba(0, 0, 0, 0.08); }
+.m-body, .m-arm { fill: #fbf1e1; stroke: #e6d3b5; stroke-width: 1.5; }
+.m-pleat { fill: none; stroke: #dcc49f; stroke-width: 1.6; stroke-linecap: round; }
+.m-seal { fill: var(--seal); }
+.m-blush { fill: #f2a49a; opacity: 0.7; }
+.m-ink { fill: none; stroke: #2b2420; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.m-ink-fill { fill: #2b2420; }
+.m-mouth { fill: #7a2a1e; }
+.m-dot { fill: var(--muted); }
+:root[data-theme="dark"] .m-shadow { fill: rgba(0, 0, 0, 0.35); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .m-shadow { fill: rgba(0, 0, 0, 0.35); }
+}
+
+.guide { padding: 18px; border-top: 3px solid var(--seal); }
+.guide-head { display: flex; align-items: center; gap: 14px; }
+.guide-head .mascot { margin: 0; }
+.guide-say { flex: 1; min-width: 0; }
+.guide-name { margin: 0 0 2px; font-size: 13px; color: var(--muted); letter-spacing: 0.02em; }
+.guide-name b { color: var(--ink); font-family: "Source Serif 4", "Noto Serif CJK SC", serif; font-size: 16px; margin-right: 4px; }
+.guide-line { margin: 0; font-size: 15px; line-height: 1.45; color: var(--ink); }
+.guide-next { margin-top: 16px; min-height: 52px; font-size: 16px; justify-content: flex-start; padding-left: 18px; }
+.guide-why { margin: 8px 2px 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.guide-why span { font-weight: 600; color: var(--ink); }
+.guide-done { margin-top: 14px; padding: 12px 14px; background: var(--ok-bg); color: var(--ok-ink); border-radius: 4px; }
+.guide-done b { display: block; margin-bottom: 8px; }
+.guide-extra { flex-wrap: wrap; gap: 8px; }
+.guide-extra .btn { color: var(--ink); min-height: 44px; }
+.guide-plan { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.guide-plan-head { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.guide-plan-head .muted { font-weight: 400; }
+.guide-bar { height: 4px; background: var(--line); margin-bottom: 6px; }
+.guide-bar i { display: block; height: 100%; background: var(--seal); transition: width 0.4s ease; }
+.guide-steps { list-style: none; margin: 0; padding: 0; }
+.guide-steps li { display: flex; align-items: center; gap: 12px; min-height: 48px; border-bottom: 1px solid var(--line); }
+.guide-steps li:last-child { border-bottom: none; }
+.gs-mark { flex: none; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid var(--line); font-size: 12px; font-weight: 600; color: var(--muted); }
+.gs-title { flex: 1; min-width: 0; color: var(--ink); text-decoration: none; padding: 12px 0; font-size: 15px; }
+.gs-title:hover { text-decoration: underline; }
+.gs-min { flex: none; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.guide-steps li.next .gs-mark { border-color: var(--seal); background: var(--seal); color: #fff; }
+.guide-steps li.next .gs-title { font-weight: 600; }
+.guide-steps li.done .gs-mark { border-color: var(--ok-ink); background: var(--ok-bg); color: var(--ok-ink); }
+.guide-steps li.done .gs-title { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+
+/* hand-off strip on every session-complete screen */
+.guide-after { display: flex; align-items: center; gap: 12px; margin: 4px 0 12px; padding: 12px 14px; background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--seal); border-radius: 4px; }
+.guide-after .mascot { margin: 0; animation: none; }
+.guide-after-body { flex: 1; min-width: 0; }
+.guide-after-title { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.guide-after-body .small { margin: 2px 0 0; color: var(--ink); font-size: 15px; }
+.guide-after .btn { flex: none; min-height: 44px; }
+
+/* floating Nada on the other screens */
+.nada-fab {
+  position: fixed; z-index: 11; right: max(16px, calc(50% - 240px + 16px)); bottom: calc(84px + env(safe-area-inset-bottom));
+  width: 56px; height: 56px; padding: 0; display: grid; place-items: center; cursor: pointer;
+  background: var(--card); border: 1px solid var(--line); border-radius: 50%; box-shadow: 0 4px 14px rgba(42, 37, 33, 0.14);
+}
+.nada-fab .mascot { animation: none; margin: 0; }
+.nada-fab:hover { border-color: var(--seal); }
+.nada-badge {
+  position: absolute; top: -2px; right: -2px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px;
+  background: var(--seal); color: #fff; font-size: 12px; font-weight: 600; line-height: 20px; text-align: center;
+  box-shadow: 0 0 0 2px var(--card);
+}
+.nada-sheet { position: fixed; inset: 0; z-index: 30; background: rgba(20, 16, 12, 0.42); display: flex; align-items: flex-end; justify-content: center; }
+.nada-sheet-card {
+  width: 100%; max-width: 480px; max-height: 86vh; overflow-y: auto; background: var(--bg); color: var(--ink);
+  border-radius: 12px 12px 0 0; padding: 20px 18px calc(20px + env(safe-area-inset-bottom)); animation: nada-sheet-in 0.22s ease-out;
+}
+.nada-sheet-card .guide-head .icon-btn { align-self: flex-start; }
+.guide-tip { margin-top: 14px; padding: 12px 14px; background: var(--soft2); border-radius: 4px; }
+.guide-tip b { font-size: 13px; }
+.guide-tip p { margin: 4px 0 0; font-size: 14px; line-height: 1.5; }
+.guide-honest { margin: 14px 0 0; font-size: 12px; line-height: 1.5; }
+@keyframes nada-sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .nada-sheet-card { animation: none; } .guide-bar i { transition: none; } }
+body.exam-focus .nada-fab { display: none; }
+@media (min-width: 1000px) {
+  .nada-fab { right: max(24px, calc(50% - 380px - 80px)); bottom: 32px; }
+  .nada-sheet { align-items: center; }
+  .nada-sheet-card { border-radius: 8px; max-width: 520px; }
+  .guide { padding: 22px 24px; }
+}
+
+/* v8 home: one compact stats strip under Nada's plan */
+.home-stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 0; }
+.hs-item { display: flex; align-items: center; gap: 10px; padding: 14px 12px; min-height: 72px; color: inherit; text-decoration: none; border-right: 1px solid var(--line); }
+.hs-item:last-child { border-right: none; }
+.hs-item:hover { background: var(--soft2); }
+.hs-item svg { flex: none; }
+.hs-item b { display: block; font-size: 15px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.hs-item small { display: block; font-size: 12px; color: var(--muted); line-height: 1.3; }
+.hs-num { flex: none; font-family: "Source Serif 4", "Noto Serif CJK SC", serif; font-size: 26px; font-weight: 600; line-height: 1; color: var(--red); font-variant-numeric: tabular-nums; }
+.home-stats .ring-track { stroke: var(--line); }
+.home-stats .ring-fill { stroke: var(--seal); }
+.memory-num { font-family: "Source Serif 4", "Noto Serif CJK SC", serif; font-size: 34px; font-weight: 600; line-height: 1; }
+@media (max-width: 380px) {
+  .hs-item { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+
+/* v8 round 2: bakpao steam, Nada speaks in a bubble, desktop home in two columns */
+.m-steam { fill: none; stroke: #d9c7aa; stroke-width: 1.6; stroke-linecap: round; opacity: 0.9; }
+.guide > .guide-head .guide-say { position: relative; background: var(--soft2); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+.guide > .guide-head .guide-say::before {
+  content: ""; position: absolute; left: -7px; top: 24px; width: 12px; height: 12px; background: var(--soft2);
+  border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); transform: rotate(45deg);
+}
+.guide-steps li { min-height: 44px; }
+.gs-title { padding: 10px 0; }
+@media (min-width: 1200px) {
+  body[data-route="home"] #app { max-width: 1080px; }
+  body[data-route="home"] .tabbar { max-width: 1080px; }
+  .home-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  .home-grid .card { margin-bottom: 16px; }
+  .home-side .home-stats { grid-template-columns: 1fr; }
+  .home-side .hs-item { border-right: none; border-bottom: 1px solid var(--line); }
+  .home-side .hs-item:last-child { border-bottom: none; }
+  .home-side .offline-note { text-align: left; }
+}
+
+/* v8 round 3: a clear, rewarding all-done state */
+.guide-done { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid color-mix(in srgb, var(--ok-ink) 30%, transparent); }
+.guide-done b { margin: 0 0 2px; font-family: "Source Serif 4", "Noto Serif CJK SC", serif; font-size: 17px; font-weight: 600; }
+.guide-done p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ink); }
+.gd-check { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--ok-ink); color: var(--card); }
+.guide-extra { margin-top: 12px; }
+.guide-extra .btn { flex: 1 1 0; }
+
+/* v8 round 4: calmer vocabulary rows, livelier cheer */
+.v-pct { flex: none; min-width: 40px; text-align: right; font-size: 13px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+.m-spark { fill: none; stroke: var(--seal); stroke-width: 2; stroke-linecap: round; }

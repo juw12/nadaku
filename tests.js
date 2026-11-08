@@ -452,6 +452,143 @@
     check("word card draws one practice-grid cell per character", cells.length === 2 && host.querySelector(".hanzi-big").dataset.len === "2", cells.length);
   }
 
+
+  {
+    // v7: HSK mock exam - paper structure, item validity, scoring, routes
+    await loadExamData();
+    const OFFICIAL = {
+      1: { items: 40, minutes: { L: 15, R: 17 }, total: 200, pass: 120 },
+      2: { items: 60, minutes: { L: 25, R: 22 }, total: 200, pass: 120 },
+      3: { items: 80, minutes: { L: 35, R: 30, W: 15 }, total: 300, pass: 180 },
+      4: { items: 100, minutes: { L: 30, R: 40, W: 25 }, total: 300, pass: 180 },
+      5: { items: 100, minutes: { L: 30, R: 45, W: 40 }, total: 300, pass: 180 },
+      6: { items: 101, minutes: { L: 35, R: 50, W: 45 }, total: 300, pass: 180 },
+    };
+    const structure = [];
+    for (const level of LEVELS) {
+      const want = OFFICIAL[level];
+      const paper = flattenPaper(level);
+      const items = paper.sections.reduce((sum, s) => sum + s.questions.length, 0);
+      const minutes = Object.fromEntries(paper.sections.map((s) => [s.id, s.minutes]));
+      const ok = items === want.items && JSON.stringify(minutes) === JSON.stringify(want.minutes)
+        && paper.total === want.total && paper.pass === want.pass && paper.sections.length * 100 === want.total;
+      if (!ok) {
+        structure.push(`HSK${level}: ${items} items ${JSON.stringify(minutes)} ${paper.total}/${paper.pass}`);
+      }
+    }
+    check("mock papers HSK 1-6 match the official HSK 2.0 item counts, section times and pass lines", structure.length === 0, structure.join(" | "));
+
+    const invalid = [];
+    const choiceCount = (q) => {
+      const it = q.item;
+      const b = q.block;
+      return (it.opts || b.opts || it.pics || b.pics || b.bank || b.sents || []).length;
+    };
+    for (const level of LEVELS) {
+      for (const q of flattenPaper(level).sections.flatMap((s) => s.questions)) {
+        const it = q.item;
+        const key = it.ans;
+        const where = `HSK${level} #${q.n} ${q.kind}`;
+        if (EXAM_SUBJECTIVE.has(q.kind)) {
+          if (!(it.sample || it.samples)) {
+            invalid.push(`${where}: no sample answer`);
+          }
+          continue;
+        }
+        if (key === undefined || key === null || key === "") {
+          invalid.push(`${where}: no key`);
+          continue;
+        }
+        if (typeof key === "number" && (key < 0 || key >= choiceCount(q))) {
+          invalid.push(`${where}: key ${key} of ${choiceCount(q)}`);
+        }
+        for (const pic of [it.pic, ...(it.pics || []), ...(q.kind === "pic_match" ? q.block.pics : [])].filter(Boolean)) {
+          if (!PICTURES[pic]) {
+            invalid.push(`${where}: missing picture ${pic}`);
+          }
+        }
+        if (!(it.ex_id && it.ex_en)) {
+          invalid.push(`${where}: no explanation`);
+        }
+      }
+    }
+    check("every mock item has a valid key, existing pictures and an ID + EN explanation", invalid.length === 0, invalid.slice(0, 4).join(" | "));
+
+    const sampleAnswer = (q) => {
+      if (EXAM_SUBJECTIVE.has(q.kind)) {
+        return q.item.samples ? q.item.samples[0] : q.item.sample;
+      }
+      return Array.isArray(q.item.ans) ? q.item.ans[0] : q.item.ans;
+    };
+    const scoring = [];
+    for (const level of LEVELS) {
+      const paper = flattenPaper(level);
+      const perfect = {};
+      paper.sections.forEach((s) => s.questions.forEach((q) => {
+        perfect[q.key] = sampleAnswer(q);
+      }));
+      const best = examTotals(paper, perfect);
+      const empty = examTotals(paper, {});
+      const objectiveFull = ["L", "R"].every((id) => best.bySection[id] === 100);
+      if (!objectiveFull || !best.passed || empty.total !== 0 || empty.passed) {
+        scoring.push(`HSK${level}: best ${JSON.stringify(best.bySection)} empty ${empty.total}`);
+      }
+    }
+    check("scoring: key answers give 100 in listening + reading and pass; a blank sheet scores 0 and fails", scoring.length === 0, scoring.join(" | "));
+
+    const p1 = flattenPaper(1);
+    const half = {};
+    p1.sections.forEach((s) => s.questions.forEach((q, i) => {
+      if (i % 2 === 0) {
+        half[q.key] = sampleAnswer(q);
+      }
+    }));
+    const halfTotals = examTotals(p1, half);
+    check("scoring: half the HSK 1 items right gives 50 + 50 = 100 / 200 (below the 120 pass line)", halfTotals.total === 100 && !halfTotals.passed, JSON.stringify(halfTotals));
+
+    const keepHash = location.hash;
+    const routeErrors = [];
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 30));
+    location.hash = "exam";
+    route();
+    await settle();
+    if (!view.querySelector(".paper-table")) {
+      routeErrors.push("exam home");
+    }
+    location.hash = "exam/quick";
+    route();
+    await settle();
+    if (!view.querySelector("h1")) {
+      routeErrors.push("quick quiz");
+    }
+    const keepProgress = localStorage.getItem(EXAM_PROGRESS_KEY);
+    startExam(1, "full", ["L", "R"]);
+    location.hash = "exam/go";
+    route();
+    await settle();
+    const introOk = !!view.querySelector(".ex-intro") && document.body.classList.contains("exam-focus");
+    if (!introOk) {
+      routeErrors.push("exam/go intro or focus mode");
+    }
+    state.examAttempts = [...(state.examAttempts || []), {
+      level: 1, mode: "full", sections: ["L", "R"], responses: half, scores: halfTotals.bySection,
+      total: halfTotals.total, passed: halfTotals.passed, seconds: 600, at: Date.now(),
+    }];
+    location.hash = "exam/result";
+    route();
+    await settle();
+    if (!view.querySelector(".result-hero") || !view.querySelector("details.review-card") || document.body.classList.contains("exam-focus")) {
+      routeErrors.push("exam/result");
+    }
+    if (keepProgress === null) {
+      localStorage.removeItem(EXAM_PROGRESS_KEY);
+    } else {
+      localStorage.setItem(EXAM_PROGRESS_KEY, keepProgress);
+    }
+    location.hash = keepHash;
+    check("exam routes render: home, quick quiz, exam/go (focus mode, no tab bar), result with collapsible review", routeErrors.length === 0, routeErrors.join(", "));
+  }
+
   state = JSON.parse(saved);
 
   const failed = results.filter((r) => !r.pass);

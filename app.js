@@ -975,6 +975,7 @@ let keyHandler = null;
 
 // ---------- Icons: one 24px line set (1.75 stroke), drawn for this app; no emoji anywhere in the UI ----------
 const ICON_PATHS = {
+  play: "M8 5.5v13l10-6.5z",
   home: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
   book: "M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7h6",
   tone: "M3 15c2.2-7 4.3-7 6 0s3.8 7 6 0 3.8-7 6 0",
@@ -1056,6 +1057,7 @@ function route() {
   updateTopbar();
   stopAudio();
   keyHandler = null;
+  document.body.classList.remove("exam-focus");
   view.innerHTML = "";
   window.scrollTo(0, 0);
   screen(arg);
@@ -1275,7 +1277,7 @@ function renderVocab() {
       <a class="card tile primary" href="#review"><span class="ic">${icon("review", 22)}</span><b>${t("reviewNow")}</b><span>${due} ${t("reviewDesc")}</span></a>
       <a class="card tile" href="#learn"><span class="ic">${icon("plus", 22)}</span><b>${t("learnNew")}</b><span>HSK ${state.level} · ${t("newDesc")}</span></a>
     </div>
-    <div class="row wrap" role="tablist" aria-label="${t("level")}" style="margin:10px 0">
+    <div class="level-chips" role="tablist" aria-label="${t("level")}">
       ${LEVELS.map((lv) => `<button class="chip ${lv === level ? "on" : ""}" role="tab" aria-selected="${lv === level}" data-lv="${lv}">HSK ${lv}</button>`).join("")}
     </div>
     <label class="sr-only" for="q">${t("search")}</label>
@@ -1867,7 +1869,7 @@ function renderWrite(arg) {
       <div class="pinyin">${coloredPinyin(word)}</div>
       <div class="meaning">${esc(gloss(word))}</div>
       <div class="row" role="tablist" style="justify-content:center;margin:8px 0">
-        <button class="chip" data-mode="watch">▶ ${t("watch")}</button>
+        <button class="chip" data-mode="watch">${icon("play", 14)} ${t("watch")}</button>
         <button class="chip on" data-mode="trace">${t("trace")}</button>
         <button class="chip" data-mode="recall">${t("recall")}</button>
       </div>
@@ -2135,7 +2137,7 @@ function shadowHtml() {
     <div class="row wrap" style="justify-content:center">
       <button class="btn dark small" id="shadow-rec" aria-label="${t("shadowHold")}">${icon("mic", 16)} ${t("shadowHold")}</button>
       <button class="btn ghost small" id="shadow-native" aria-label="${t("listen")}">${icon("sound", 16)} ${t("listen")}</button>
-      <button class="btn ghost small" id="shadow-mine" disabled aria-label="${t("shadowMine")}">▶ ${t("shadowMine")}</button>
+      <button class="btn ghost small" id="shadow-mine" disabled aria-label="${t("shadowMine")}">${icon("play", 14)} ${t("shadowMine")}</button>
     </div>
     <svg id="shadow-pitch" viewBox="0 0 300 60" width="100%" height="60" aria-hidden="true"></svg>
     <div id="shadow-result" class="muted center small-text" aria-live="polite">${t("shadowTip")}</div>
@@ -2225,11 +2227,16 @@ function listenOnce(onText) {
   rec.start();
 }
 
-// ---------- Mock exam (per HSK level) ----------
-function renderExam() {
-  const best = state.examBest[state.level];
+// ---------- Exam tab: full HSK mock papers live in exam_ui.js; the 10-question vocabulary quiz stays here ----------
+function renderExam(arg) {
+  renderExamScreen(arg);
+}
+
+function renderQuickQuiz() {
+  const best = state.quizBest ? state.quizBest[state.level] : undefined;
   view.innerHTML = `
-    <h1>${t("exam")} · HSK ${state.level}</h1>
+    <a class="back-link" href="#exam">${icon("back", 16)} ${t("exam")}</a>
+    <h1>${state.lang === "id" ? "Kuis kosakata" : "Vocabulary quiz"} · HSK ${state.level}</h1>
     <div class="card"><p>${t("examTip")}</p>
       ${best !== undefined ? `<p><span class="pill green">${t("best")}: ${best}/10</span></p>` : ""}
       <button class="btn block" id="go">${t("startExam")}</button></div>`;
@@ -2267,7 +2274,8 @@ function runExam() {
 
   function show() {
     if (index >= questions.length) {
-      state.examBest[state.level] = Math.max(state.examBest[state.level] || 0, score);
+      state.quizBest = state.quizBest || {};
+      state.quizBest[state.level] = Math.max(state.quizBest[state.level] || 0, score);
       addXP(score * 2);
       view.innerHTML = `
         <h1>${t("result")} · HSK ${state.level}</h1>
@@ -2275,7 +2283,7 @@ function runExam() {
         <p>${t("readiness")}: <b>${score * 10}%</b></p>
         <div class="row wrap" style="justify-content:center">${missed.map((w) => `<span class="pill" style="font-size:18px">${zh(w.hanzi)} ${w.pinyin}</span>`).join("")}</div></div>
         ${missed.length ? `<button class="btn block" id="add">${t("addMissed")}</button>` : ""}
-        <a class="btn block ghost" style="margin-top:10px" href="#exam">${icon("restart", 18)} ${t("retake")}</a>`;
+        <a class="btn block ghost" style="margin-top:10px" href="#exam/quick">${icon("restart", 18)} ${t("retake")}</a>`;
       announce(`${t("result")}: ${score} ${t("ofTen")}`);
       const add = document.getElementById("add");
       if (add) {
@@ -2441,7 +2449,7 @@ function renderSettings() {
     </div>
     <div class="card">
       <a class="btn block ghost" href="#stats">${icon("chart", 18)} ${t("stats")}</a>
-      <button class="btn block ghost" id="export" style="margin-top:10px">⬇️ ${t("exportData")}</button>
+      <button class="btn block ghost" id="export" style="margin-top:10px">${icon("download", 18)} ${t("exportData")}</button>
       <button class="btn block ghost" id="csv" style="margin-top:10px">${icon("download", 18)} ${t("studyData")}</button>
       <button class="btn block ghost" id="csvTones" style="margin-top:10px">${icon("download", 18)} ${t("toneData")} (${(state.toneLog || []).length})</button>
       <label class="btn block ghost" style="margin-top:10px">${icon("upload", 18)} ${t("importData")}<input type="file" id="import" accept="application/json" class="sr-only"></label>

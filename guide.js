@@ -20,6 +20,7 @@ const GUIDE_TEXT = {
     extraLearn: "Tambah 5 kata lagi",
     extraStats: "Lihat statistik",
     openGuide: "Buka panduan Nada",
+    allDoneShort: "Antrean hari ini beres",
     close: "Tutup",
     honest: "Nada menyusun rencana dari progres di perangkat ini. Aturannya tetap dan offline, tanpa AI di server.",
     tipTitle: "Tips untuk layar ini",
@@ -38,7 +39,7 @@ const GUIDE_TEXT = {
     stepExam: "Latihan 1 bagian ujian HSK {lv}",
     whyExam: "Latihan format ujian seminggu sekali membuat hari ujian terasa biasa.",
     lineFirst: "Halo, aku Nada. Aku akan memandu kamu langkah demi langkah. Mulai dari langkah pertama di bawah.",
-    lineMany: "Ada {n} kartu yang mulai terlupa. Kita ulang dulu, baru tambah kata baru.",
+    lineMany: "Hari ini agak padat: {n} kartu jatuh tempo. Rencananya {left} langkah, sekitar {min} menit.",
     lineProgress: "Bagus, {done} langkah selesai. Tinggal {left} lagi.",
     lineStart: "Rencana hari ini sudah siap: {left} langkah, sekitar {min} menit.",
     afterTitle: "Nada: langkah berikutnya",
@@ -72,6 +73,7 @@ const GUIDE_TEXT = {
     extraLearn: "Learn 5 more words",
     extraStats: "View stats",
     openGuide: "Open Nada's guide",
+    allDoneShort: "Today's queue is done",
     close: "Close",
     honest: "Nada builds the plan from progress stored on this device. The rules are fixed and offline, with no AI server.",
     tipTitle: "Tip for this screen",
@@ -90,7 +92,7 @@ const GUIDE_TEXT = {
     stepExam: "Practise 1 HSK {lv} exam section",
     whyExam: "Practising the exam format once a week makes test day feel normal.",
     lineFirst: "Hi, I'm Nada. I'll guide you step by step. Start with the first step below.",
-    lineMany: "{n} cards are starting to fade. Let's review first, then add new words.",
+    lineMany: "A busy day: {n} cards are due. The plan is {left} steps, about {min} minutes.",
     lineProgress: "Nice, {done} steps done. {left} to go.",
     lineStart: "Today's plan is ready: {left} steps, about {min} minutes.",
     afterTitle: "Nada: next step",
@@ -114,6 +116,8 @@ const GUIDE_TEXT = {
 // Minimum activity (XP earned in that area today) that counts a step as done.
 const GUIDE_DONE_XP = { review: 1, learn: 5, tones: 5, write: 2, talk: 5, exam: 1 };
 const GUIDE_MINUTES = { review: 6, learn: 5, tones: 3, write: 3, talk: 3, exam: 10 };
+const GUIDE_HUB_ROUTES = ["vocab", "talk", "exam", "me", "stats", "indo"];
+
 const GUIDE_ICONS = { review: "review", learn: "plus", tones: "tone", write: "pen", talk: "chat", exam: "exam" };
 const GUIDE_AREAS = ["review", "learn", "tones", "write", "talk", "exam"];
 
@@ -215,7 +219,7 @@ function guideSummary(now = Date.now()) {
     line = gt("lineFirst");
     mood = "happy";
   } else if (next.id === "review" && due >= 15) {
-    line = fill(gt("lineMany"), { n: due });
+    line = fill(gt("lineMany"), { n: due, left, min: minutes });
     mood = "think";
   } else if (done > 0) {
     line = fill(gt("lineProgress"), { done, left });
@@ -227,9 +231,18 @@ function guideSummary(now = Date.now()) {
   return { steps, done, left, next, minutes, line, mood };
 }
 
-function guideStepsHtml(summary) {
+function guideStepsHtml(summary, inSheet = false) {
+  // The current step is the primary button itself, so the next action appears once, not twice.
+  const close = inSheet ? " data-close" : "";
   return `<ol class="guide-steps">${summary.steps.map((s, i) => {
-    const status = s.done ? "done" : s === summary.next ? "next" : "todo";
+    if (s === summary.next) {
+      return `<li class="next merged"><a class="btn block guide-next" href="${s.href}"${close}>
+        <span class="gs-mark" aria-hidden="true">${i + 1}</span>
+        <span class="gn-title">${esc(s.title)}</span>
+        <span class="gn-min">${s.minutes} ${gt("minutes")}</span></a>
+        <p class="guide-why"><span>${gt("why")}:</span> ${esc(s.why)}</p></li>`;
+    }
+    const status = s.done ? "done" : "todo";
     const marker = s.done ? icon("check", 14) : String(i + 1);
     return `<li class="${status}"><span class="gs-mark" aria-hidden="true">${marker}</span>
       <a href="${s.href}" class="gs-title">${esc(s.title)}</a>
@@ -245,14 +258,13 @@ function guideCardHtml(now = Date.now()) {
   const next = summary.next;
   return `<section class="card guide" aria-labelledby="guide-title">
     <div class="guide-head">
-      ${mascotSvg(summary.mood, 76)}
+      ${mascotSvg(summary.mood, 84)}
       <div class="guide-say">
         <p class="guide-name"><b id="guide-title">Nada</b> <span>${gt("role")}</span></p>
         <p class="guide-line">${esc(summary.line)}</p>
       </div>
     </div>
-    ${next ? `<a class="btn block guide-next" href="${next.href}">${icon(next.icon, 18)} ${esc(next.title)}</a>
-      <p class="guide-why"><span>${gt("why")}:</span> ${esc(next.why)}</p>`
+    ${next ? ""
       : `<div class="guide-done" role="status">
         <span class="gd-check" aria-hidden="true">${icon("check", 22)}</span>
         <div><b>${gt("allDoneTitle")}</b><p>${gt("allDoneMore")}</p></div>
@@ -304,9 +316,48 @@ function guideMountFab(routeName, force = false) {
   fab.type = "button";
   fab.setAttribute("aria-label", gt("openGuide"));
   const summary = guideSummary();
-  fab.innerHTML = `${mascotSvg(summary.next ? "happy" : "cheer", 40)}${summary.left ? `<span class="nada-badge">${summary.left}</span>` : ""}`;
+  // On hub screens (not mid-session) Nada shows the next step as a label, so it is visible without a tap.
+  const hash = location.hash.slice(1);
+  const hub = GUIDE_HUB_ROUTES.includes(routeName) && !hash.includes("/");
+  // No label when this screen already offers the same step as a visible link: one action, one wording.
+  const sameLinkOnScreen = summary.next && !!document.querySelector(`#view a[href="${summary.next.href}"]`);
+  const showLabel = hub && summary.next && summary.next.href !== `#${routeName}` && !sameLinkOnScreen;
+  const label = showLabel
+    ? `<span class="nada-pill-text"><small>${gt("next")}</small><b>${esc(summary.next.title)}</b></span>`
+    : (hub && !summary.next ? `<span class="nada-pill-text"><small>Nada</small><b>${gt("allDoneShort")}</b></span>` : "");
+  if (label) {
+    fab.classList.add("nada-pill");
+    fab.setAttribute("aria-label", `${gt("openGuide")}. ${summary.next ? `${gt("next")}: ${summary.next.title}` : gt("allDoneShort")}`);
+  }
+  fab.innerHTML = `${mascotSvg(summary.next ? "happy" : "cheer", 40)}${label}${summary.left ? `<span class="nada-badge">${summary.left}</span>` : ""}`;
   fab.addEventListener("click", () => guideOpenSheet(routeName));
   document.body.appendChild(fab);
+  guideBindScroll();
+}
+
+// While the learner scrolls down, the pill tucks to just Nada so it never covers content;
+// scrolling up, the top of the page or the page end brings the label back.
+let guideScrollBound = false;
+let guideLastY = 0;
+function guideBindScroll() {
+  if (guideScrollBound) {
+    return;
+  }
+  guideScrollBound = true;
+  guideLastY = window.scrollY;
+  window.addEventListener("scroll", () => {
+    const y = window.scrollY;
+    const fab = document.getElementById("nada-fab");
+    if (fab && fab.classList.contains("nada-pill")) {
+      const nearEnd = window.innerHeight + y >= document.documentElement.scrollHeight - 24;
+      if (y <= 80 || nearEnd || y < guideLastY - 4) {
+        fab.classList.remove("tucked");
+      } else if (y > guideLastY + 4) {
+        fab.classList.add("tucked");
+      }
+    }
+    guideLastY = y;
+  }, { passive: true });
 }
 
 function guideOpenSheet(routeName) {
@@ -317,7 +368,7 @@ function guideOpenSheet(routeName) {
   sheet.className = "nada-sheet";
   sheet.innerHTML = `<div class="nada-sheet-card" role="dialog" aria-modal="true" aria-labelledby="nada-sheet-title">
     <div class="guide-head">
-      ${mascotSvg(summary.mood, 52)}
+      ${mascotSvg(summary.mood, 64)}
       <div class="guide-say">
         <p class="guide-name"><b id="nada-sheet-title">Nada</b> <span>${gt("role")}</span></p>
         <p class="guide-line">${esc(summary.line)}</p>
@@ -325,11 +376,10 @@ function guideOpenSheet(routeName) {
       <button class="icon-btn" type="button" data-close aria-label="${gt("close")}">${icon("close", 18)}</button>
     </div>
     ${tip ? `<div class="guide-tip"><b>${gt("tipTitle")}</b><p>${esc(tip)}</p></div>` : ""}
-    ${summary.next ? `<a class="btn block guide-next" href="${summary.next.href}" data-close>${icon(summary.next.icon, 18)} ${esc(summary.next.title)}</a>` : ""}
     <div class="guide-plan">
       <div class="row guide-plan-head"><span>${gt("planTitle")}</span><span class="spacer"></span>
         <span class="muted">${summary.done} ${gt("of")} ${summary.steps.length} ${gt("stepsDone")}</span></div>
-      ${guideStepsHtml(summary)}
+      ${guideStepsHtml(summary, true)}
     </div>
     <p class="muted small guide-honest">${gt("honest")}</p>
   </div>`;

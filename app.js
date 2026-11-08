@@ -1150,7 +1150,9 @@ function mascotLine(kind) {
 
 function mascotSvg(mood = "happy", size = 72) {
   // Nada: a steamed bun (bakpao, a word Indonesian learners already know) with the app's seal-red dot on top.
-  const eyes = mood === "cheer"
+  const wink = '<path d="M21.5 38 Q24 35.6 26.5 38" class="m-ink" fill="none" stroke-width="2.4" stroke-linecap="round"/>';
+  const openRight = '<ellipse cx="40" cy="37.6" rx="2.6" ry="3.1" class="m-ink-fill"/><circle cx="40.9" cy="36.4" r="0.95" fill="#fff"/>';
+  const eyes = mood === "encourage" ? wink + openRight : mood === "cheer"
     ? '<path d="M21.5 38.5 Q24 35 26.5 38.5" class="m-ink" fill="none" stroke-width="2.4" stroke-linecap="round"/><path d="M37.5 38.5 Q40 35 42.5 38.5" class="m-ink" fill="none" stroke-width="2.4" stroke-linecap="round"/>'
     : `<ellipse cx="24" cy="${mood === "think" ? 36.6 : 37.6}" rx="2.6" ry="3.1" class="m-ink-fill"/><ellipse cx="40" cy="${mood === "think" ? 36.6 : 37.6}" rx="2.6" ry="3.1" class="m-ink-fill"/>
        <circle cx="24.9" cy="${mood === "think" ? 35.4 : 36.4}" r="0.95" fill="#fff"/><circle cx="40.9" cy="${mood === "think" ? 35.4 : 36.4}" r="0.95" fill="#fff"/>`;
@@ -1280,12 +1282,18 @@ function renderVocab() {
   let shown = LIST_PAGE;
   let query = "";
   let level = state.level;
+  // Only the tile that matches Nada's next step is filled; the other one stays quiet.
+  const nadaNext = typeof guideSummary === "function" ? guideSummary().next : null;
+  const nextHref = nadaNext ? nadaNext.href : "";
+  const primaryTile = ["#review", "#learn"].includes(nextHref) ? nextHref : (due > 0 ? "#review" : "#learn");
+  const nextTag = nadaNext && nextHref === primaryTile && typeof gt === "function"
+    ? `<small class="tile-next">${gt("next")}</small>` : "";
 
   view.innerHTML = `
     <h1>${t("vocab")}</h1>
     <div class="grid2">
-      <a class="card tile primary" href="#review"><span class="ic">${icon("review", 22)}</span><b>${t("reviewNow")}</b><span>${due} ${t("reviewDesc")}</span></a>
-      <a class="card tile" href="#learn"><span class="ic">${icon("plus", 22)}</span><b>${t("learnNew")}</b><span>HSK ${state.level} · ${t("newDesc")}</span></a>
+      <a class="card tile ${primaryTile === "#review" ? "primary" : "quiet"}" href="#review">${primaryTile === "#review" ? nextTag : ""}<span class="ic">${icon("review", 22)}</span><b>${t("reviewNow")}</b><span>${due} ${t("reviewDesc")}</span></a>
+      <a class="card tile ${primaryTile === "#learn" ? "primary" : "quiet"}" href="#learn">${primaryTile === "#learn" ? nextTag : ""}<span class="ic">${icon("plus", 22)}</span><b>${t("learnNew")}</b><span>HSK ${state.level} · ${t("newDesc")}</span></a>
     </div>
     <div class="level-chips" role="tablist" aria-label="${t("level")}">
       ${LEVELS.map((lv) => `<button class="chip ${lv === level ? "on" : ""}" role="tab" aria-selected="${lv === level}" data-lv="${lv}">HSK ${lv}</button>`).join("")}

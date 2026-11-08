@@ -909,3 +909,55 @@ body.exam-focus .nada-fab { display: none; }
 /* v8 round 4: calmer vocabulary rows, livelier cheer */
 .v-pct { flex: none; min-width: 40px; text-align: right; font-size: 13px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 .m-spark { fill: none; stroke: var(--seal); stroke-width: 2; stroke-linecap: round; }
+
+/* v8 round 5: next step visible without a tap on hub screens */
+.nada-fab.nada-pill {
+  width: auto; max-width: min(320px, calc(100vw - 32px)); height: 56px; padding: 0 16px 0 8px;
+  display: flex; align-items: center; gap: 8px; border-radius: 28px; text-align: left;
+}
+.nada-pill-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.nada-pill-text small { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.nada-pill-text b { font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nada-pill .nada-badge { top: -4px; right: -4px; }
+#app { padding-bottom: 156px; }
+@media (min-width: 1000px) { #app { padding-bottom: 96px; } }
+.gs-min { font-size: 13px; }
+
+/* v8 round 6: the next step is the first queue row, the pill tucks while scrolling, stats join the plan */
+.guide-head + .guide-plan { margin-top: 16px; }
+.guide-steps li.merged { display: block; padding: 6px 0 12px; }
+.guide-steps li.merged .guide-next { margin-top: 0; min-height: 52px; gap: 12px; padding: 0 16px 0 12px; }
+.guide-steps li.merged .gs-mark { border-color: rgba(255, 255, 255, 0.7); background: transparent; color: #fff; }
+.gn-title { flex: 1; min-width: 0; text-align: left; font-size: 16px; font-weight: 600; }
+.gn-min { flex: none; font-size: 13px; font-weight: 500; opacity: 0.85; font-variant-numeric: tabular-nums; }
+.guide-steps li.merged .guide-why { margin: 8px 2px 0; }
+.nada-sheet-card .guide-plan { margin-top: 14px; }
+.nada-fab.nada-pill.tucked { width: 56px; padding: 0; justify-content: center; gap: 0; }
+.nada-pill.tucked .nada-pill-text { display: none; }
+@media (max-width: 1199px) {
+  .home-main .guide { margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+  .home-side > .home-stats:first-child { border-top: none; border-top-left-radius: 0; border-top-right-radius: 0; background: var(--soft2); }
+  .home-side > .home-stats:first-child .hs-item:hover { background: var(--card); }
+}
+
+/* v8 round 7: the reason reads as part of the step, legible stats, steam visible at button size */
+.guide-steps li.merged .guide-why { margin: 0; padding: 8px 12px; background: var(--soft2); border-radius: 0 0 4px 4px; color: var(--ink); }
+.guide-steps li.merged .guide-next { border-radius: 4px 4px 0 0; }
+.guide-why span { color: var(--seal); }
+.hs-item { padding: 16px 12px; min-height: 80px; }
+.hs-item b { font-size: 17px; }
+.hs-item small { font-size: 13px; }
+.hs-num { font-size: 28px; }
+.hs-item b { white-space: nowrap; }
+.hs-item { gap: 8px; }
+.nada-fab .m-steam, .guide-after .m-steam { stroke-width: 2.6; stroke: #c9ae86; }
+
+/* v8 round 8: on vocabulary only the tile for Nada's next step is filled */
+.grid2 .tile { position: relative; }
+.tile.quiet { background: var(--card); }
+.tile.quiet b { font-size: 14px; font-weight: 600; }
+.tile.quiet .ic { color: var(--muted); }
+.tile-next {
+  position: absolute; top: 10px; right: 10px; padding: 2px 8px; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+}

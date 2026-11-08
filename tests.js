@@ -636,12 +636,25 @@
       && !!homeGuide.querySelector(".guide-why") && homeGuide.querySelectorAll(".guide-steps li").length === fresh.steps.length
       && !!homeGuide.querySelector("svg.mascot[aria-hidden='true']"));
 
+    const nextTitle = fresh.next.title;
+    const nextMentions = homeGuide ? [...homeGuide.querySelectorAll("a, b, p, span")]
+      .filter((el) => el.children.length === 0 && el.textContent.trim() === nextTitle).length : 0;
+    check("guide: home names the next step once (the first queue row is the primary button, no duplicate)",
+      nextMentions === 1 && !!homeGuide.querySelector(".guide-steps li.next a.guide-next"), `${nextMentions} mentions`);
+
+    const happyFace = mascotSvg("happy", 40);
+    const encourageFace = mascotSvg("encourage", 40);
+    check("guide: Nada's moods differ at button size (encourage winks and waves, happy does not)",
+      encourageFace !== happyFace && encourageFace.includes("m-arm") && !happyFace.includes("m-arm")
+      && (encourageFace.match(/m-ink-fill/g) || []).length === 1 && (happyFace.match(/m-ink-fill/g) || []).length === 2);
+
     const strip = document.createElement("div");
     strip.innerHTML = guideNextHtml(now);
     const go = strip.querySelector(".guide-after-go");
     check("guide: session-complete strip hands off to the next queued step",
       !!go && go.getAttribute("href") === guideSummary(now).next.href, go ? go.getAttribute("href") : "none");
 
+    view.innerHTML = "";
     guideMountFab("vocab", true);
     const fab = document.getElementById("nada-fab");
     let sheetOk = false;
@@ -654,9 +667,45 @@
       sheetOk = sheetOk && !document.getElementById("nada-sheet");
     }
     const fabOk = !!fab && fab.getAttribute("aria-label") && fab.querySelector(".nada-badge");
+    const pillText = fab ? (fab.querySelector(".nada-pill-text b") || {}).textContent : "";
+    check("guide: on hub screens the floating Nada shows the next step as a label (visible without a tap)",
+      !!fab && fab.classList.contains("nada-pill") && pillText === guideSummary(now).next.title, pillText);
+    let tuckOk = false;
+    if (fab) {
+      const spacer = document.createElement("div");
+      spacer.style.height = "4000px";
+      document.body.appendChild(spacer);
+      window.scrollTo(0, 0);
+      window.dispatchEvent(new Event("scroll"));
+      window.scrollTo(0, 600);
+      window.dispatchEvent(new Event("scroll"));
+      const tuckedDown = fab.classList.contains("tucked");
+      window.scrollTo(0, 300);
+      window.dispatchEvent(new Event("scroll"));
+      tuckOk = tuckedDown && !fab.classList.contains("tucked");
+      spacer.remove();
+      window.scrollTo(0, 0);
+    }
+    check("guide: the pill tucks to just Nada while scrolling down and shows the label again on scroll up", tuckOk);
+    view.innerHTML = `<a href="${guideSummary(now).next.href}">x</a>`;
+    guideMountFab("vocab", true);
+    const plainFab = document.getElementById("nada-fab");
+    check("guide: no pill label when the screen already links to the same next step (one action, one wording)",
+      !!plainFab && !plainFab.classList.contains("nada-pill") && !!plainFab.querySelector(".nada-badge"));
+    view.innerHTML = "";
     guideMountFab("home", true);
     check("guide: floating Nada on other screens opens a labelled sheet (tip, queue, honesty note) that closes on Escape; hidden on home",
       fabOk && sheetOk && !document.getElementById("nada-fab"));
+
+    location.hash = "vocab";
+    route();
+    const filledTiles = [...view.querySelectorAll(".grid2 .tile.primary")];
+    const vocabNext = guideSummary(now).next;
+    const expectTile = ["#review", "#learn"].includes(vocabNext.href) ? vocabNext.href : null;
+    check("guide: vocabulary fills only one tile, the one for Nada's next step, and marks it",
+      filledTiles.length === 1 && (!expectTile || filledTiles[0].getAttribute("href") === expectTile)
+      && (!expectTile || !!filledTiles[0].querySelector(".tile-next")) && view.querySelectorAll(".grid2 .tile.quiet").length === 1,
+      filledTiles.map((el) => el.getAttribute("href")).join(","));
 
     const copy = JSON.stringify(GUIDE_TEXT).toLowerCase();
     const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;

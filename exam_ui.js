@@ -35,7 +35,7 @@ const EXAM_TEXT = {
     useWords: "Gunakan semua kata ini", typeHere: "Ketik dengan keyboard pinyin…", tapTiles: "Ketuk kata sesuai urutan",
     tapOrder: "Ketuk A, B, C sesuai urutan", clear: "Hapus", correctNow: "Benar", wrongNow: "Belum tepat",
     transcript: "Transkrip", translation: "Terjemahan", why: "Penjelasan", practiceMode: "Latihan", simMode: "Simulasi", check: "Cek jawaban",
-    elapsed: "Waktu", score: "Nilai", passedAt: "Lulus pada", exitConfirm: "Keluar? Progres disimpan dan bisa dilanjutkan.",
+    elapsed: "Waktu", score: "Nilai", scoreMax: "Nilai maks", passedAt: "Lulus pada", exitConfirm: "Keluar? Progres disimpan dan bisa dilanjutkan.",
     exit: "Keluar", sectionScore: "Nilai bagian", choose: "Pilih bagian latihan", picture: "Gambar",
   },
   en: {
@@ -64,7 +64,7 @@ const EXAM_TEXT = {
     useWords: "Use all of these words", typeHere: "Type with a pinyin keyboard…", tapTiles: "Tap the words in order",
     tapOrder: "Tap A, B, C in order", clear: "Clear", correctNow: "Correct", wrongNow: "Not quite",
     transcript: "Transcript", translation: "Translation", why: "Explanation", practiceMode: "Practice", simMode: "Mock exam", check: "Check answer",
-    elapsed: "Time", score: "Score", passedAt: "Pass mark", exitConfirm: "Leave? Your progress is saved and can be resumed.",
+    elapsed: "Time", score: "Score", scoreMax: "Max score", passedAt: "Pass mark", exitConfirm: "Leave? Your progress is saved and can be resumed.",
     exit: "Leave", sectionScore: "Section score", choose: "Choose a section to practise", picture: "Picture",
   },
 };
@@ -466,18 +466,20 @@ function renderExamHome() {
       <div class="paper-head"><h2>HSK ${level} <span class="muted">· ${et("paper")}</span></h2>
         <span class="pill">${totalItems} ${et("items")} · ${totalMinutes} ${et("min")}</span></div>
       <table class="paper-table">
-        <thead><tr><th>${et("sections")}</th><th class="num">${et("items")}</th><th class="num">${et("min")}</th><th class="num">${et("score")}</th></tr></thead>
+        <thead><tr><th>${et("sections")}</th><th class="num">${et("items")}</th><th class="num">${et("min")}</th><th class="num">${et("scoreMax")}</th></tr></thead>
         <tbody>${paper.sections.map((s) => `<tr><td>${sectionName(s.id)}</td><td class="num">${s.questions.length}</td><td class="num">${s.minutes}</td><td class="num">100</td></tr>`).join("")}</tbody>
         <tfoot><tr><td>${et("total")}</td><td class="num">${totalItems}</td><td class="num">${totalMinutes}</td><td class="num">${paper.total}</td></tr></tfoot>
       </table>
       <p class="small muted">${et("passLine")}: <b>${paper.pass}</b> / ${paper.total}</p>
       <button class="btn block" id="start-full">${icon("exam", 18)} ${et("startFull")}</button>
       <p class="small muted center tight">${et("startFullSub")}</p>
+    </section>
+    <section class="card practice-card" aria-label="${et("choose")}">
+      <h2 class="h3">${et("practice")}</h2>
+      <p class="small muted tight">${et("practiceSub")}</p>
       <div class="practice-row" role="group" aria-label="${et("choose")}">
-        <span class="small muted">${et("practice")}:</span>
         ${paper.sections.map((s) => `<button class="btn ghost small" data-practice="${s.id}">${sectionName(s.id)}</button>`).join("")}
       </div>
-      <p class="small muted center tight">${et("practiceSub")}</p>
     </section>
     <section class="card">
       <h2 class="h3">${et("history")}</h2>

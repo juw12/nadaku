@@ -2,10 +2,10 @@
 
 **Live:** https://juw12.github.io/nadaku/ (HTTPS → mic, install and offline cache work out of the box).
 **Local:** double-click `start.bat`, or open `index.html` in Chrome/Edge.
-`?demo=1` shows sample progress · `?test=1` runs the 96 automated checks.
+`?demo=1` shows sample progress · `?test=1` runs the 102 automated checks.
 
 ## What it does
-- **Nada, your study guide:** a steamed-bun (bakpao) mascot with four expressions leads the home screen with today's ordered queue (review due cards, new words, your weakest tone, writing, then conversation or one mock-exam section), always shows one next step and why, and hands you to the next step on every session-complete screen until the queue is empty. A floating Nada button on the other screens opens a tip for that screen plus the queue. Rule-based and fully offline: no chatbot, no server.
+- **Nada, your study guide:** a steamed-bun (bakpao) mascot with four expressions leads the home screen with today's ordered queue (review due cards, new words, your weakest tone, writing, then conversation or one mock-exam section), always shows one next step and why, and hands you to the next step on every session-complete screen until the queue is empty. On the other screens a floating Nada shows the next step as a label (it tucks away while you scroll down and stays a small round button when the screen already offers that step), and opens a tip for that screen plus the queue. The next step appears once: the first unfinished queue row is the primary button, with its reason attached. Rule-based and fully offline: no chatbot, no server.
 - **Content:** all 5,363 HSK 3.0 words (levels 1–6) with Indonesian (CC-CIDICT) + English glosses, tone-coloured pinyin cross-checked against 3 sources, 4 Indonesian-context roleplays.
 - **Real example sentences for 3,728 words** (was 111): 6,054 native sentences from Tatoeba, kept only when every word is an HSK word at or below the word's level. Every sentence has Indonesian: 1,672 human translations from Tatoeba (direct, or via the linked English sentence) and 4,868 machine translations, marked **MT** in the app. Each links back to its Tatoeba entry.
 - **Reading audit:** every word's pinyin was checked against how it is actually read in those sentences; 16 wrong default readings fixed (没 méi, 吧 ba, 行 xíng, 雨 yǔ, 重 zhòng, 为 wèi, 胖 pàng, 老公 = husband…).

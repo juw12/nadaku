@@ -707,6 +707,63 @@
       && (!expectTile || !!filledTiles[0].querySelector(".tile-next")) && view.querySelectorAll(".grid2 .tile.quiet").length === 1,
       filledTiles.map((el) => el.getAttribute("href")).join(","));
 
+    location.hash = "home";
+    route();
+    const homeStats = view.querySelector(".home-stats");
+    check("polish: home has no duplicate streak or memory chart; the strip shows goal, words remembered and level",
+      !!homeStats && homeStats.querySelectorAll(".hs-item").length === 3 && !view.querySelector(".memory-card")
+      && homeStats.textContent.includes(t("remembered")) && !homeStats.textContent.includes(t("streak")));
+
+    const moods = ["happy", "encourage", "think", "cheer"];
+    check("mascot: every mood sits on steamer paper stamped with the app seal",
+      moods.every((m) => mascotSvg(m, 40).includes("m-paper") && (mascotSvg(m, 40).match(/class="m-seal"/g) || []).length === 2));
+
+    const afterExam = document.createElement("div");
+    afterExam.innerHTML = guideAfterExamHtml(now);
+    const nonExamNext = guideSummary(now).steps.find((s) => !s.done && s.id !== "exam");
+    check("guide: the exam section intro names what Nada does after the exam (no clutter while the timer runs)",
+      !!afterExam.querySelector(".ex-after-nada svg.mascot")
+      && (nonExamNext ? afterExam.textContent.includes(nonExamNext.title) : afterExam.textContent.includes(gt("afterThisDone"))));
+
+    location.hash = "vocab";
+    route();
+    const rowMeters = [...view.querySelectorAll(".list-item .v-meter")];
+    check("polish: vocabulary rows use one neutral meter; red only marks fading words, characters stay ink",
+      !view.querySelector(".list-item .zh .t1, .list-item .zh .t2, .list-item .zh .t3, .list-item .zh .t4")
+      && rowMeters.every((m) => !(m.querySelector("i").getAttribute("style") || "").includes("background")), `${rowMeters.length} meters`);
+
+    location.hash = "home";
+    route();
+    check("polish: home has one progress meter (no plan progress bar next to the daily-goal ring)",
+      !view.querySelector(".guide .guide-bar") && !!view.querySelector(".home-stats .ring-fill"));
+
+    const doneKey = `nada-done-${dateKey(now)}`;
+    sessionStorage.setItem(doneKey, "0");
+    state.activity[today] = { review: 1 };
+    const popOnce = document.createElement("div");
+    popOnce.innerHTML = guideCardHtml(now);
+    const popAgain = document.createElement("div");
+    popAgain.innerHTML = guideCardHtml(now);
+    check("guide: the step just finished pops once when home is drawn, then stays still",
+      popOnce.querySelectorAll(".guide-steps li.just-done").length === 1 && !popAgain.querySelector(".just-done"));
+
+    state.activity[today] = { review: 99, learn: 99, tones: 99, write: 99, talk: 99 };
+    const keepExamLevel = state.examLevel;
+    state.examLevel = state.level;
+    const examNext = guideSummary(now).next;
+    location.hash = "exam";
+    route();
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    const picks = view.querySelectorAll("[data-practice].nada-pick");
+    const fullBtn = document.getElementById("start-full");
+    check("guide: when Nada's next step is an exam section, exam home fills only that section button",
+      (!guideSummary(now).steps.some((s) => s.id === "exam") || (examNext && examNext.id === "exam"))
+      && (!examNext || examNext.id !== "exam" || (picks.length === 1 && !!fullBtn && fullBtn.classList.contains("ghost"))),
+      examNext ? examNext.id : "none");
+    state.examLevel = keepExamLevel;
+    state.activity[today] = {};
+    sessionStorage.removeItem(doneKey);
+
     const copy = JSON.stringify(GUIDE_TEXT).toLowerCase();
     const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
     check("guide: copy is honest (rule-based, offline, no server AI claim) and has no emoji",

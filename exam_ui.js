@@ -450,6 +450,12 @@ function renderExamHome() {
   const totalItems = paper.sections.reduce((sum, s) => sum + s.questions.length, 0);
   const totalMinutes = paper.sections.reduce((sum, s) => sum + s.minutes, 0);
   const attempts = (state.examAttempts || []).filter((a) => a.level === level && a.mode === "full").slice(-5).reverse();
+  // When Nada's next step is "practise one exam section", that section becomes the one filled button
+  // and the full mock exam steps back, so the page offers a single next action.
+  const nadaNext = typeof guideSummary === "function" ? guideSummary().next : null;
+  const nadaSection = nadaNext && nadaNext.id === "exam" && level === state.level && !progress
+    ? paper.sections[Math.floor(Date.now() / DAY) % paper.sections.length].id : null;
+  const nextTag = nadaSection && typeof gt === "function" ? `<small class="tile-next inline">${gt("next")}</small>` : "";
   view.innerHTML = `
     <h1>${et("title")}</h1>
     <p class="muted lead">${et("lead")}</p>
@@ -471,14 +477,14 @@ function renderExamHome() {
         <tfoot><tr><td>${et("total")}</td><td class="num">${totalItems}</td><td class="num">${totalMinutes}</td><td class="num">${paper.total}</td></tr></tfoot>
       </table>
       <p class="small muted">${et("passLine")}: <b>${paper.pass}</b> / ${paper.total}</p>
-      <button class="btn block" id="start-full">${icon("exam", 18)} ${et("startFull")}</button>
+      <button class="btn block${nadaSection ? " ghost" : ""}" id="start-full">${icon("exam", 18)} ${et("startFull")}</button>
       <p class="small muted center tight">${et("startFullSub")}</p>
     </section>
     <section class="card practice-card" aria-label="${et("choose")}">
       <h2 class="h3">${et("practice")}</h2>
       <p class="small muted tight">${et("practiceSub")}</p>
       <div class="practice-row" role="group" aria-label="${et("choose")}">
-        ${paper.sections.map((s) => `<button class="btn ghost small" data-practice="${s.id}">${sectionName(s.id)}</button>`).join("")}
+        ${paper.sections.map((s) => `<button class="btn small${s.id === nadaSection ? " nada-pick" : " ghost"}" data-practice="${s.id}">${sectionName(s.id)}${s.id === nadaSection ? nextTag : ""}</button>`).join("")}
       </div>
     </section>
     <section class="card">
@@ -596,6 +602,7 @@ function runExamSession() {
         }).join("")}</ol>
         ${sec.id === "L" && !practice ? `<p class="small muted">${et("noBack")} ${progress.level <= 3 ? (state.lang === "id" ? "Setiap audio diputar dua kali." : "Each recording is played twice.") : (state.lang === "id" ? "Setiap audio diputar sekali." : "Each recording is played once.")}</p>` : ""}
         <button class="btn block" id="begin">${et("begin")}</button>
+        ${typeof guideAfterExamHtml === "function" ? guideAfterExamHtml() : ""}
       </div>`;
     document.getElementById("begin").onclick = () => {
       progress.intro = false;

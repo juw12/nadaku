@@ -25,7 +25,7 @@ const STRINGS = {
   id: {
     home: "Beranda", vocab: "Kosakata", tones: "Nada", write: "Tulis", talk: "Bicara", exam: "Ujian",
     greeting: "Ayo belajar hari ini!", dailyGoal: "Target harian", streak: "hari beruntun",
-    memoryTitle: "Meteran Memori", memoryNow: "kata yang kamu ingat sekarang",
+    memoryTitle: "Meteran Memori", memoryNow: "kata yang kamu ingat sekarang", remembered: "kata diingat",
     memoryDesc: "Perkiraan kata yang benar-benar masih kamu ingat (model FSRS), bukan sekadar jumlah kata.",
     in7: "Tanpa review, 7 hari lagi tinggal", learned: "Dipelajari", due: "Perlu review", strong: "Kuat",
     week: "Aktivitas 7 hari", start: "Mulai", reviewNow: "Review sekarang", learnNew: "Pelajari 5 kata baru",
@@ -75,7 +75,7 @@ const STRINGS = {
   en: {
     home: "Home", vocab: "Words", tones: "Tones", write: "Write", talk: "Talk", exam: "Exam",
     greeting: "Let's learn today!", dailyGoal: "Daily goal", streak: "day streak",
-    memoryTitle: "Memory Meter", memoryNow: "words you remember right now",
+    memoryTitle: "Memory Meter", memoryNow: "words you remember right now", remembered: "words remembered",
     memoryDesc: "Estimated words you actually still remember (FSRS model), not just a word count.",
     in7: "Without review, in 7 days you'd keep", learned: "Learned", due: "Due", strong: "Strong",
     week: "Last 7 days", start: "Start", reviewNow: "Review now", learnNew: "Learn 5 new words",
@@ -1149,35 +1149,42 @@ function mascotLine(kind) {
 }
 
 function mascotSvg(mood = "happy", size = 72) {
-  // Nada: a steamed bun (bakpao, a word Indonesian learners already know) with the app's seal-red dot on top.
-  const wink = '<path d="M21.5 38 Q24 35.6 26.5 38" class="m-ink" fill="none" stroke-width="2.4" stroke-linecap="round"/>';
-  const openRight = '<ellipse cx="40" cy="37.6" rx="2.6" ry="3.1" class="m-ink-fill"/><circle cx="40.9" cy="36.4" r="0.95" fill="#fff"/>';
-  const eyes = mood === "encourage" ? wink + openRight : mood === "cheer"
-    ? '<path d="M21.5 38.5 Q24 35 26.5 38.5" class="m-ink" fill="none" stroke-width="2.4" stroke-linecap="round"/><path d="M37.5 38.5 Q40 35 42.5 38.5" class="m-ink" fill="none" stroke-width="2.4" stroke-linecap="round"/>'
-    : `<ellipse cx="24" cy="${mood === "think" ? 36.6 : 37.6}" rx="2.6" ry="3.1" class="m-ink-fill"/><ellipse cx="40" cy="${mood === "think" ? 36.6 : 37.6}" rx="2.6" ry="3.1" class="m-ink-fill"/>
-       <circle cx="24.9" cy="${mood === "think" ? 35.4 : 36.4}" r="0.95" fill="#fff"/><circle cx="40.9" cy="${mood === "think" ? 35.4 : 36.4}" r="0.95" fill="#fff"/>`;
+  // Nada: a steamed bun (bakpao, a word Indonesian learners already know) with the app's seal-red dot on top,
+  // sitting on its square of steamer paper. The paper carries a tiny red seal, the same mark as the app icon.
+  const eyeOpen = (cx, cy, look = 0) => `<ellipse cx="${cx}" cy="${cy}" rx="2.6" ry="3.1" class="m-ink-fill"/>`
+    + `<circle cx="${cx + 0.9 + look}" cy="${cy - 1.2 - look}" r="0.95" fill="#fff"/>`;
+  const eyeArc = (cx) => `<path d="M${cx - 2.5} 38.5 Q${cx} 35 ${cx + 2.5} 38.5" class="m-ink" fill="none" stroke-width="2.4" stroke-linecap="round"/>`;
+  const eyes = {
+    happy: eyeOpen(24, 37.6) + eyeOpen(40, 37.6),
+    encourage: eyeArc(24) + eyeOpen(40, 37.6),
+    think: eyeOpen(24.6, 36.6, 0.6) + eyeOpen(40.6, 36.6, 0.6),
+    cheer: eyeArc(24) + eyeArc(40),
+  };
   const mouths = {
     happy: '<path d="M28.6 43.2 Q32 46.6 35.4 43.2" class="m-ink" fill="none" stroke-width="2" stroke-linecap="round"/>',
     cheer: '<path d="M28 42.4 Q32 49.5 36 42.4 Z" class="m-mouth"/>',
-    think: '<path d="M29.5 44.4 Q32 43.2 34.5 44.4" class="m-ink" fill="none" stroke-width="2" stroke-linecap="round"/>',
-    encourage: '<path d="M28.4 43 Q32 47.6 35.6 43" class="m-ink" fill="none" stroke-width="2.2" stroke-linecap="round"/>',
+    think: '<path d="M29.6 44.2 Q31.6 45.2 33.6 43.6" class="m-ink" fill="none" stroke-width="2" stroke-linecap="round"/>',
+    encourage: '<path d="M28.2 42.8 Q32 47.8 35.8 42.8" class="m-ink" fill="none" stroke-width="2.2" stroke-linecap="round"/>',
   };
   const steam = mood === "think" ? "" : '<path d="M27 11.5 C25.4 9.6 28.4 7.8 26.8 5.6" class="m-steam"/><path d="M37 11.5 C35.4 9.6 38.4 7.8 36.8 5.6" class="m-steam"/>';
+  const armRight = '<ellipse cx="57" cy="29.5" rx="3.3" ry="5.6" transform="rotate(38 57 29.5)" class="m-arm"/>';
+  const armLeft = '<ellipse cx="7" cy="29.5" rx="3.3" ry="5.6" transform="rotate(-38 7 29.5)" class="m-arm"/>';
   const extra = {
     think: '<circle cx="53" cy="18" r="2.2" class="m-dot"/><circle cx="58" cy="11.5" r="1.5" class="m-dot"/>',
-    cheer: '<path d="M12 19 L15.5 21.5 M9 27 L13 27.3 M52 19 L48.5 21.5 M55 27 L51 27.3" class="m-spark"/><path d="M7.5 41 Q3.5 35.5 6.5 31" class="m-arm" fill="none" stroke-width="3.6" stroke-linecap="round"/><path d="M56.5 41 Q60.5 35.5 57.5 31" class="m-arm" fill="none" stroke-width="3.6" stroke-linecap="round"/>',
-    encourage: '<path d="M56 43 Q61 40 59.5 34.5" class="m-arm" fill="none" stroke-width="3.6" stroke-linecap="round"/>',
+    cheer: `<path d="M12 19 L15.5 21.5 M9 27 L13 27.3 M52 19 L48.5 21.5 M55 27 L51 27.3" class="m-spark"/>${armLeft}${armRight}`,
+    encourage: armRight,
     happy: "",
   };
   return `<svg class="mascot mascot-${mood}" width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true">
-    <ellipse cx="32" cy="58.5" rx="19" ry="3" class="m-shadow"/>
+    <path d="M13.5 53 L50.5 53 L56 61 L8 61 Z" class="m-paper"/>
+    <rect x="47.4" y="57.4" width="4.4" height="2.8" rx="0.4" class="m-seal"/>
     ${steam}
     ${extra[mood] || ""}
     <path d="M8 45 C8 27 19.5 15 32 15 C44.5 15 56 27 56 45 C56 53 47 57 32 57 C17 57 8 53 8 45 Z" class="m-body"/>
     <path d="M32 16.5 C30.4 20.5 27.6 22.6 23.8 23.6 M32 16.5 C33.6 20.5 36.4 22.6 40.2 23.6 M32 16.5 L32 22" class="m-pleat" fill="none" stroke-width="1.6" stroke-linecap="round"/>
     <circle cx="32" cy="27.4" r="2.7" class="m-seal"/>
     <ellipse cx="18.6" cy="44" rx="3.6" ry="2.1" class="m-blush"/><ellipse cx="45.4" cy="44" rx="3.6" ry="2.1" class="m-blush"/>
-    ${eyes}
+    ${eyes[mood] || eyes.happy}
     ${mouths[mood] || mouths.happy}
   </svg>`;
 }
@@ -1193,24 +1200,9 @@ function renderHome() {
   const goalPct = Math.min(1, todayXp / state.goal);
   const learnedCount = Object.keys(state.cards).length;
   const memory = memoryScore(now);
-  const memory7 = memoryScore(now + 7 * DAY);
-  const strong = Object.values(state.cards).filter((c) => retention(c, now) >= 0.9).length;
   const circumference = 2 * Math.PI * 34;
   const levelWords = wordsAtLevel(state.level);
   const levelLearned = levelWords.filter((w) => state.cards[w.hanzi]).length;
-
-  const forecast = [];
-  for (let d = 0; d <= 14; d += 1) {
-    forecast.push(memoryScore(now + d * DAY));
-  }
-  const maxY = Math.max(1, learnedCount);
-  const points = forecast.map((v, d) => `${(d / 14) * 300},${90 - (v / maxY) * 80}`).join(" ");
-
-  const week = [];
-  for (let d = 6; d >= 0; d -= 1) {
-    const key = dateKey(now - d * DAY);
-    week.push({ label: new Date(now - d * DAY).toLocaleDateString(state.lang === "id" ? "id-ID" : "en-US", { weekday: "short" }), xp: state.days[key] || 0 });
-  }
 
   view.innerHTML = `
     <div class="row page-head"><h1>${t("greeting")}</h1><span class="spacer"></span>
@@ -1228,27 +1220,14 @@ function renderHome() {
         <span><b>${todayXp}/${state.goal}</b><small>${t("dailyGoal")}</small></span>
       </a>
       <a class="hs-item" href="#stats">
-        <span class="hs-num">${streakDays()}</span>
-        <span><b>${t("streak")}</b><small>${week.filter((w) => w.xp > 0).length}/7</small></span>
+        <span class="hs-num">${memory.toFixed(0)}</span>
+        <span><b>${t("remembered")}</b><small>/ ${learnedCount}</small></span>
       </a>
       <a class="hs-item" href="#me">
         <span class="hs-num">${levelLearned}</span>
         <span><b>HSK ${state.level}</b><small>/ ${levelWords.length}</small></span>
       </a>
     </section>
-
-    <div class="card memory-card">
-      <div class="row"><b>${t("memoryTitle")}</b><span class="spacer"></span><span class="pill green">${t("strong")}: ${strong}</span></div>
-      <div class="row" style="align-items:baseline;margin-top:6px"><span class="memory-num">${memory.toFixed(0)}</span><span class="muted">&nbsp;/ ${learnedCount} ${t("memoryNow")}</span></div>
-      <svg viewBox="0 0 300 95" width="100%" height="80" preserveAspectRatio="none" style="margin-top:4px" role="img" aria-label="${t("in7")} ${memory7.toFixed(0)}">
-        <line x1="0" y1="10" x2="300" y2="10" stroke="var(--line)" stroke-dasharray="4 4"/>
-        <polyline points="0,90 ${points} 300,90" fill="var(--soft)" stroke="none"/>
-        <polyline points="${points}" fill="none" stroke="var(--red)" stroke-width="2.5"/>
-        <text x="0" y="8" font-size="9" fill="var(--muted)">${learnedCount}</text>
-        <text x="300" y="94" font-size="9" fill="var(--muted)" text-anchor="end">+14${t("days")}</text>
-      </svg>
-      <p class="sub" style="margin:4px 0 0">${t("in7")} <b>${memory7.toFixed(0)}</b>. ${t("memoryDesc")} <a href="#stats">${t("stats")}</a></p>
-    </div>
 
     <a class="card row indo-card" href="#indo">
       <span class="ic" aria-hidden="true">${FLAG_ID}</span>
@@ -1318,15 +1297,15 @@ function renderVocab() {
     listEl.innerHTML = items.slice(0, shown).map((w) => {
       const card = state.cards[w.hanzi];
       const r = retention(card, now);
-      const color = r >= 0.9 ? "var(--ok)" : r >= 0.7 ? "var(--gold)" : "var(--bad)";
+      const fading = r < 0.7;
       return `<button class="list-item" data-say="${esc(w.hanzi)}" aria-label="${esc(w.hanzi)} ${esc(w.pinyin)}, ${esc(gloss(w))}">
-        <div class="zh">${coloredHanzi(w)}</div>
+        <div class="zh" lang="zh-CN">${esc(w.hanzi)}</div>
         <div style="flex:1;text-align:left">
           <div>${coloredPinyin(w)}${w.level !== level ? ` <span class="pill tiny">HSK ${w.level}</span>` : ""}</div>
           <div class="muted" style="font-size:13px">${esc(gloss(w))}</div>
-          ${card ? `<div class="meter" style="margin-top:6px"><i style="width:${r * 100}%;background:${color}"></i></div>` : ""}
+          ${card ? `<div class="meter v-meter${fading ? " fading" : ""}"><i style="width:${r * 100}%"></i></div>` : ""}
         </div>
-        ${card ? `<span class="v-pct">${Math.round(r * 100)}%</span>` : `<span class="pill">${t("notLearned")}</span>`}
+        ${card ? `<span class="v-pct${fading ? " fading" : ""}">${Math.round(r * 100)}%</span>` : `<span class="pill">${t("notLearned")}</span>`}
       </button>`;
     }).join("") + (items.length > shown ? `<button class="btn ghost block" id="more">${t("more")} (${items.length - shown})</button>` : "");
     listEl.querySelectorAll("[data-say]").forEach((el) => el.addEventListener("click", () => playAny(el.dataset.say)));

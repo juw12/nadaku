@@ -21,6 +21,8 @@ const GUIDE_TEXT = {
     extraStats: "Lihat statistik",
     openGuide: "Buka panduan Nada",
     allDoneShort: "Antrean hari ini beres",
+    afterThis: "Setelah ini",
+    afterThisDone: "Setelah ini, rencana hari ini selesai.",
     close: "Tutup",
     honest: "Nada menyusun rencana dari progres di perangkat ini. Aturannya tetap dan offline, tanpa AI di server.",
     tipTitle: "Tips untuk layar ini",
@@ -74,6 +76,8 @@ const GUIDE_TEXT = {
     extraStats: "View stats",
     openGuide: "Open Nada's guide",
     allDoneShort: "Today's queue is done",
+    afterThis: "After this",
+    afterThisDone: "After this, today's plan is complete.",
     close: "Close",
     honest: "Nada builds the plan from progress stored on this device. The rules are fixed and offline, with no AI server.",
     tipTitle: "Tip for this screen",
@@ -231,7 +235,7 @@ function guideSummary(now = Date.now()) {
   return { steps, done, left, next, minutes, line, mood };
 }
 
-function guideStepsHtml(summary, inSheet = false) {
+function guideStepsHtml(summary, inSheet = false, justDone = -1) {
   // The current step is the primary button itself, so the next action appears once, not twice.
   const close = inSheet ? " data-close" : "";
   return `<ol class="guide-steps">${summary.steps.map((s, i) => {
@@ -242,7 +246,7 @@ function guideStepsHtml(summary, inSheet = false) {
         <span class="gn-min">${s.minutes} ${gt("minutes")}</span></a>
         <p class="guide-why"><span>${gt("why")}:</span> ${esc(s.why)}</p></li>`;
     }
-    const status = s.done ? "done" : "todo";
+    const status = s.done ? (i === justDone ? "done just-done" : "done") : "todo";
     const marker = s.done ? icon("check", 14) : String(i + 1);
     return `<li class="${status}"><span class="gs-mark" aria-hidden="true">${marker}</span>
       <a href="${s.href}" class="gs-title">${esc(s.title)}</a>
@@ -254,7 +258,23 @@ function guideStepsHtml(summary, inSheet = false) {
 // The plan card on the home screen.
 function guideCardHtml(now = Date.now()) {
   const summary = guideSummary(now);
-  const pct = summary.steps.length ? Math.round((summary.done / summary.steps.length) * 100) : 100;
+  // Remember how many steps were done when home was last drawn, so the step that just
+  // got ticked off can pop once: the learner sees the queue move on.
+  let justDone = -1;
+  try {
+    const key = `nada-done-${dateKey(now)}`;
+    const before = Number(sessionStorage.getItem(key) || "0");
+    if (summary.done > before) {
+      summary.steps.forEach((s, i) => {
+        if (s.done) {
+          justDone = i;
+        }
+      });
+    }
+    sessionStorage.setItem(key, String(summary.done));
+  } catch (error) {
+    justDone = -1;
+  }
   const next = summary.next;
   return `<section class="card guide" aria-labelledby="guide-title">
     <div class="guide-head">
@@ -274,8 +294,7 @@ function guideCardHtml(now = Date.now()) {
     <div class="guide-plan">
       <div class="row guide-plan-head"><span>${gt("planTitle")}</span><span class="spacer"></span>
         <span class="muted">${summary.done} ${gt("of")} ${summary.steps.length} ${gt("stepsDone")}</span></div>
-      <div class="guide-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="${gt("planTitle")}"><i style="width:${pct}%"></i></div>
-      ${guideStepsHtml(summary)}
+      ${guideStepsHtml(summary, false, justDone)}
     </div>
   </section>`;
 }
@@ -293,6 +312,15 @@ function guideNextHtml(now = Date.now()) {
     ${next ? `<a class="btn small guide-after-go" href="${next.href}">${gt("start")} ${icon("arrow", 16)}</a>`
       : `<a class="btn ghost small" href="#home">${icon("home", 16)}</a>`}
   </div>`;
+}
+
+// Quiet line on the exam section intro: the learner sees where Nada goes after the exam,
+// without anything moving or competing while the timer runs.
+function guideAfterExamHtml(now = Date.now()) {
+  const summary = guideSummary(now);
+  const after = summary.steps.find((s) => !s.done && s.id !== "exam");
+  const text = after ? `${gt("afterThis")}: <b>${esc(after.title)}</b>` : esc(gt("afterThisDone"));
+  return `<p class="ex-after-nada">${mascotSvg(after ? "happy" : "cheer", 32)}<span>${text}</span></p>`;
 }
 
 // Floating Nada button on the other screens: opens a sheet with a tip for this screen and today's queue.
@@ -368,7 +396,7 @@ function guideOpenSheet(routeName) {
   sheet.className = "nada-sheet";
   sheet.innerHTML = `<div class="nada-sheet-card" role="dialog" aria-modal="true" aria-labelledby="nada-sheet-title">
     <div class="guide-head">
-      ${mascotSvg(summary.mood, 64)}
+      ${mascotSvg(summary.mood, 76)}
       <div class="guide-say">
         <p class="guide-name"><b id="nada-sheet-title">Nada</b> <span>${gt("role")}</span></p>
         <p class="guide-line">${esc(summary.line)}</p>

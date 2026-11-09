@@ -961,3 +961,35 @@ body.exam-focus .nada-fab { display: none; }
   position: absolute; top: 10px; right: 10px; padding: 2px 8px; border-radius: 10px;
   background: rgba(255, 255, 255, 0.2); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
 }
+
+/* v9 round 10: one accent with intent. Red marks actions and things that need you; numbers are ink. */
+.hs-num { color: var(--ink); }
+.v-meter { margin-top: 6px; height: 4px; background: var(--line); }
+.v-meter i { display: block; height: 100%; background: var(--ink); opacity: 0.55; }
+.v-meter.fading i { background: var(--seal); opacity: 1; }
+.v-pct.fading { color: var(--seal); }
+.list-item .zh { color: var(--ink); }
+
+/* v9: Nada sits on bakpao steamer paper stamped with the app's seal */
+.m-paper { fill: #f3e8d2; stroke: #dcc8a6; stroke-width: 1.2; stroke-linejoin: round; }
+:root[data-theme="dark"] .m-paper { fill: #4a4136; stroke: #6b5d4b; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .m-paper { fill: #4a4136; stroke: #6b5d4b; } }
+
+.ex-after-nada { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+.ex-after-nada .mascot { animation: none; margin: 0; }
+.ex-after-nada b { color: var(--ink); font-weight: 600; }
+
+@media (max-width: 480px) {
+  .home-stats .hs-item { flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; padding: 12px 12px; min-height: 84px; }
+  .home-stats .hs-item:first-child { flex-direction: row; align-items: center; }
+  .home-stats .hs-num { font-size: 24px; }
+  .home-stats .hs-item b { font-size: 14px; }
+}
+.v-meter i { opacity: 0.32; }
+
+/* v9 round 11: the queue visibly moves on; exam home follows Nada's pick */
+@keyframes gs-pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); } }
+.guide-steps li.just-done .gs-mark { animation: gs-pop 0.5s ease-out 0.15s both; }
+@media (prefers-reduced-motion: reduce) { .guide-steps li.just-done .gs-mark { animation: none; } }
+.tile-next.inline { position: static; margin-left: 8px; vertical-align: 1px; }
+.practice-row .btn.nada-pick { min-height: 44px; }

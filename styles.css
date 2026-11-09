@@ -1083,3 +1083,8 @@ body.hskk-on .nada-fab { display: none; }
 }
 .btn-text:hover,
 .btn-text:focus-visible { color: var(--ink); }
+
+/* v10 round 15: 44px tap targets in compact segments; room between the live meter and 'Done, next' */
+.seg-small .seg-btn,
+.hk-rate .seg-btn { min-height: 44px; }
+.hk-meter { margin: 10px 0 28px; }

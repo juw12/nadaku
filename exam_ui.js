@@ -18,6 +18,11 @@ const EXAM_TEXT = {
     resume: "Lanjutkan ujian", discard: "Buang", quick: "Kuis kosakata cepat (10 soal)",
     history: "Riwayat", noHistory: "Belum ada simulasi. Nilai, bagian lemah dan pembahasan akan muncul di sini.",
     note: "Soal latihan orisinal yang mengikuti format resmi HSK 2.0, bukan soal ujian asli. Kosakata dibatasi pada daftar HSK Nadaku sampai level ini. Audio memakai suara Mandarin di perangkatmu; tanpa suara itu, rekaman kata penutur asli dirangkai.",
+    papersTitle: "Contoh soal resmi", papersSub: "Kertas contoh dari penyelenggara HSK dan Institut Konfusius, untuk latihan setelah simulasi di sini. Perlu internet; dibuka di tab baru.",
+    papersLevel: "Kertas contoh HSK {n} + kunci jawaban (PDF, CTI)", papersAudio: "Pusat unduhan resmi CTI: audio menyimak, HSK 1-6, HSK 7-9 dan HSKK",
+    papersLse: "Institut Konfusius LSE: soal + audio HSK 1-6 dan HSKK", papersGroningen: "Institut Konfusius Groningen: HSK 2.0, HSK 3.0, HSKK, dengan audio",
+    papersShared: "Kumpulan contoh soal HSK dan HSKK (tautan dari komunitas)",
+    papersNote: "Soal resmi milik Chinese Testing International. Nadaku hanya menautkan dan tidak menyalin isinya.",
     loading: "Memuat soal…", part: "Bagian", question: "Soal", of: "dari", next: "Lanjut", prev: "Sebelumnya",
     flag: "Tandai", flagged: "Ditandai", sheet: "Lembar jawaban", finishSection: "Selesaikan bagian", finishExam: "Selesaikan ujian",
     unanswered: "soal belum dijawab. Tetap selesaikan bagian ini?", confirm: "Ya, selesaikan", cancel: "Kembali ke soal",
@@ -47,6 +52,11 @@ const EXAM_TEXT = {
     resume: "Resume exam", discard: "Discard", quick: "Quick vocabulary quiz (10 questions)",
     history: "History", noHistory: "No mock exams yet. Scores, weak parts and explanations will appear here.",
     note: "Original practice items that follow the official HSK 2.0 format, not real exam papers. Vocabulary stays within Nadaku's HSK lists up to this level. Audio uses your device's Mandarin voice; without one, native word recordings are chained.",
+    papersTitle: "Official sample papers", papersSub: "Sample papers from the HSK organiser and Confucius Institutes, to practise after the mocks here. Needs internet; opens in a new tab.",
+    papersLevel: "HSK {n} sample paper + answer key (PDF, CTI)", papersAudio: "Official CTI download centre: listening audio, HSK 1-6, HSK 7-9 and HSKK",
+    papersLse: "LSE Confucius Institute: HSK 1-6 and HSKK papers + audio", papersGroningen: "Groningen Confucius Institute: HSK 2.0, HSK 3.0, HSKK, with audio",
+    papersShared: "HSK and HSKK sample collection (community link)",
+    papersNote: "Official papers belong to Chinese Testing International. Nadaku only links to them and does not copy their content.",
     loading: "Loading the paper…", part: "Part", question: "Question", of: "of", next: "Next", prev: "Previous",
     flag: "Flag", flagged: "Flagged", sheet: "Answer sheet", finishSection: "Finish section", finishExam: "Finish exam",
     unanswered: "questions unanswered. Finish this section anyway?", confirm: "Yes, finish", cancel: "Back to questions",
@@ -70,6 +80,33 @@ const EXAM_TEXT = {
 };
 
 const PART_ZH = ["", "第一部分", "第二部分", "第三部分", "第四部分"];
+
+// Official and community sample papers: linked, never copied (the papers are (c) Chinese Testing International).
+const OFFICIAL_PAPERS = {
+  level: (n) => `http://download.chinesetest.cn/newhsk-site/model/HSK${n}_yj.pdf`,
+  cti: "https://admin.chinesetest.cn/newhsk/godownload.do",
+  lse: "https://www.lse.ac.uk/cibl/qualifications/test-resources",
+  groningen: "https://www.confuciusgroningen.nl/hskhskk-test/sample-test-papers",
+  shared: "https://bit.ly/ContohSoalHSKdanHSKK",
+};
+
+function officialPapersHtml(level) {
+  const link = (href, label) => `<li><a href="${href}" target="_blank" rel="noopener noreferrer">${label}</a></li>`;
+  return `<section class="card papers-card">
+    <details>
+      <summary><h2 class="h3">${et("papersTitle")}</h2></summary>
+      <p class="small muted tight">${et("papersSub")}</p>
+      <ul class="papers-list">
+        ${link(OFFICIAL_PAPERS.level(level), et("papersLevel").replace("{n}", level))}
+        ${link(OFFICIAL_PAPERS.cti, et("papersAudio"))}
+        ${link(OFFICIAL_PAPERS.lse, et("papersLse"))}
+        ${link(OFFICIAL_PAPERS.groningen, et("papersGroningen"))}
+        ${link(OFFICIAL_PAPERS.shared, et("papersShared"))}
+      </ul>
+      <p class="tiny muted">${et("papersNote")}</p>
+    </details>
+  </section>`;
+}
 
 function et(key) {
   return EXAM_TEXT[state.lang][key] ?? EXAM_TEXT.en[key] ?? key;
@@ -500,6 +537,7 @@ function renderExamHome() {
       </div>
     </section>
     ${typeof hskkHomeCardHtml === "function" ? hskkHomeCardHtml(level, nadaSection === "S" ? nextTag : "") : ""}
+    ${officialPapersHtml(level)}
     ${attempts.length ? `<section class="card">
       <h2 class="h3">${et("history")}</h2>
       <ul class="history">${attempts.map((a) => `

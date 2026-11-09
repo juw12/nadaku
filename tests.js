@@ -829,6 +829,17 @@
     });
     check("HSKK: Nada's exam step rotates through every written section and the speaking mock, every level", rotationOk);
 
+    const keepPapersLevel = state.examLevel;
+    state.examLevel = 4;
+    renderExamHome();
+    const papersLinks = [...view.querySelectorAll(".papers-card a")];
+    check("Exam: official sample papers are linked (not copied) for the chosen level, plus audio/HSKK portals and the shared collection",
+      papersLinks.length === 5 && papersLinks[0].href.endsWith("/HSK4_yj.pdf")
+      && papersLinks.every((a) => a.target === "_blank" && a.rel.includes("noopener"))
+      && papersLinks.some((a) => a.href.includes("bit.ly/ContohSoalHSKdanHSKK")),
+      papersLinks.map((a) => a.href).join(" "));
+    state.examLevel = keepPapersLevel;
+
     const keepAttempts = state.hskkAttempts;
     const keepXp = state.xp;
     const keepDays = JSON.parse(JSON.stringify(state.days));

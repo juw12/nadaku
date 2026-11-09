@@ -1088,3 +1088,12 @@ body.hskk-on .nada-fab { display: none; }
 .seg-small .seg-btn,
 .hk-rate .seg-btn { min-height: 44px; }
 .hk-meter { margin: 10px 0 28px; }
+
+/* v10.1: linked official sample papers */
+.papers-card summary { cursor: pointer; list-style-position: inside; }
+.papers-card summary .h3 { display: inline; margin: 0; }
+.papers-list { list-style: none; margin: 10px 0 8px; padding: 0; }
+.papers-list li { border-top: 1px solid var(--line); line-height: 1.4; }
+.papers-list li:last-child { border-bottom: 1px solid var(--line); }
+.papers-list a { display: block; padding: 11px 0; color: var(--ink); text-underline-offset: 3px; }
+.papers-card .tiny { font-size: 0.8rem; }

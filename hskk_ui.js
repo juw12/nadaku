@@ -10,11 +10,16 @@ const HSKK_META = {
   advanced: { hsk: "5-6", items: 6, prep: 10, minutes: 25, parts: [["retell", 3, 8], ["read", 1, 2], ["open", 2, 5]] },
 };
 const HSKK_LEVELS = ["beginner", "intermediate", "advanced"];
+// Paket A = HSKK_PAPERS, Paket B = HSKK_PAPERS_B (same format, different items; both in hskk.js).
+function hskkSet() {
+  return state.hskkSet === "B" ? "B" : "A";
+}
 const HSKK_PART_ZH = { 1: "第一部分", 2: "第二部分", 3: "第三部分" };
 const HSKK_VOICE_LEVEL = { beginner: 1, intermediate: 3, advanced: 5 };
 
 const HSKK_TEXT = {
   id: {
+    paperSet: "Paket",
     card: "Ujian lisan (HSKK)", cardSub: "Kemampuan bicara diuji terpisah di HSKK. Pilih tingkat yang sesuai dengan level HSK-mu.",
     beginner: "Dasar", intermediate: "Menengah", advanced: "Lanjut", forHsk: "cocok untuk HSK",
     prep: "Persiapan", total: "Total", passLine: "Batas lulus", start: "Mulai simulasi lisan", last: "Terakhir",
@@ -53,6 +58,7 @@ const HSKK_TEXT = {
     hsk12Write: "Format resmi HSK 1–2 hanya Mendengar dan Membaca; menulis mulai di HSK 3. Bicara diuji di HSKK di bawah.",
   },
   en: {
+    paperSet: "Set",
     card: "Speaking exam (HSKK)", cardSub: "Speaking is tested separately in the HSKK. Pick the level that matches your HSK level.",
     beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced", forHsk: "fits HSK",
     prep: "Preparation", total: "Total", passLine: "Pass line", start: "Start speaking mock", last: "Last",
@@ -168,7 +174,8 @@ function loadHskkData() {
 function hskkHomeCardHtml(hskLevel, nadaTag = "") {
   const levelId = HSKK_LEVELS.includes(state.hskkLevel) ? state.hskkLevel : hskkLevelFor(hskLevel);
   const meta = HSKK_META[levelId];
-  const last = (state.hskkAttempts || []).filter((a) => a.level === levelId).slice(-1)[0];
+  const paperSet = hskkSet();
+  const last = (state.hskkAttempts || []).filter((a) => a.level === levelId && (a.set || "A") === paperSet).slice(-1)[0];
   const testMinutes = meta.parts.reduce((sum, p) => sum + p[2], 0);
   return `<section class="card hskk-card" aria-label="${ht("card")}">
     <div class="paper-head"><h2 class="h3">${ht("card")}</h2>
@@ -176,6 +183,9 @@ function hskkHomeCardHtml(hskLevel, nadaTag = "") {
     <p class="small muted tight">${ht("cardSub")}</p>
     <div class="seg seg-small" role="radiogroup" aria-label="HSKK">
       ${HSKK_LEVELS.map((id) => `<button class="seg-btn ${id === levelId ? "on" : ""}" role="radio" aria-checked="${id === levelId}" data-hskk="${id}">${ht(id)}</button>`).join("")}
+    </div>
+    <div class="seg seg-small set-seg" role="radiogroup" aria-label="${ht("paperSet")}">
+      ${["A", "B"].map((set) => `<button class="seg-btn ${set === paperSet ? "on" : ""}" role="radio" aria-checked="${set === paperSet}" data-hskk-set="${set}">${ht("paperSet")} ${set}</button>`).join("")}
     </div>
     <details class="hk-parts-detail"><summary>${ht("partsDetail")}</summary>
     <table class="paper-table">
@@ -190,6 +200,13 @@ function hskkHomeCardHtml(hskLevel, nadaTag = "") {
 }
 
 function hskkBindHome(rerender) {
+  document.querySelectorAll("[data-hskk-set]").forEach((el) => {
+    el.onclick = () => {
+      state.hskkSet = el.dataset.hskkSet;
+      saveState();
+      rerender();
+    };
+  });
   document.querySelectorAll("[data-hskk]").forEach((el) => {
     el.onclick = () => {
       state.hskkLevel = el.dataset.hskk;
@@ -342,7 +359,8 @@ function hskkRun(levelId, opts = {}) {
   if (hskkSession) {
     hskkSession.cleanup();
   }
-  const paper = HSKK_PAPERS[levelId];
+  const paperSet = opts.set || hskkSet();
+  const paper = (paperSet === "B" && typeof HSKK_PAPERS_B !== "undefined" ? HSKK_PAPERS_B : HSKK_PAPERS)[levelId];
   const speed = opts.speed || 1;
   const voiceLevel = HSKK_VOICE_LEVEL[levelId];
   const route = `#exam/hskk-${levelId}`;
@@ -352,7 +370,7 @@ function hskkRun(levelId, opts = {}) {
   };
   hskkSession = session;
   const lang = state.lang === "id" ? "id" : "en";
-  const levelName = `HSKK ${ht(levelId)}`;
+  const levelName = `HSKK ${ht(levelId)} · ${ht("paperSet")} ${paperSet}`;
 
   const onHashChange = () => {
     if (location.hash !== route && hskkSession === session) {
@@ -716,7 +734,7 @@ function hskkRun(levelId, opts = {}) {
     const weakIndex = paper.parts.reduce((best, p, i) => (score.parts[i] / p.points < score.parts[best] / paper.parts[best].points ? i : best), 0);
     const weakPart = paper.parts[weakIndex];
     state.hskkAttempts = [...(state.hskkAttempts || []), {
-      level: levelId, date: Date.now(), total: score.total, passed: score.passed, parts: score.parts,
+      level: levelId, set: paperSet, date: Date.now(), total: score.total, passed: score.passed, parts: score.parts,
     }].slice(-20);
     addXP(Math.max(1, Math.round(score.total / 10)));
     saveState();

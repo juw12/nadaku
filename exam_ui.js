@@ -12,6 +12,7 @@ const EXAM_TEXT = {
   id: {
     title: "Ujian HSK", lead: "Simulasi ujian lengkap dengan format kertas HSK yang berlaku sekarang: bagian, jumlah soal, waktu dan nilai.",
     paper: "Paket A", sections: "Bagian", items: "soal", min: "menit", total: "Total", passLine: "Batas lulus",
+    paperSet: "Paket", setNote: "Dua kertas latihan per level dengan format yang sama; Paket B memakai teks dan soal yang berbeda.",
     L: "Mendengar", R: "Membaca", W: "Menulis",
     startFull: "Mulai simulasi penuh", startFullSub: "Berwaktu, audio diputar sesuai aturan, nilai di akhir",
     practice: "Latihan per bagian", practiceSub: "Tanpa batas waktu, langsung lihat jawaban dan penjelasan",
@@ -46,6 +47,7 @@ const EXAM_TEXT = {
   en: {
     title: "HSK Exam", lead: "A full mock exam in the current HSK paper format: same sections, item counts, timing and scoring.",
     paper: "Paper A", sections: "Sections", items: "items", min: "min", total: "Total", passLine: "Pass mark",
+    paperSet: "Set", setNote: "Two practice papers per level in the same format; Set B uses different texts and questions.",
     L: "Listening", R: "Reading", W: "Writing",
     startFull: "Start full mock exam", startFullSub: "Timed, audio plays by the exam rules, score at the end",
     practice: "Practise one section", practiceSub: "No time limit, see the answer and explanation right away",
@@ -116,7 +118,8 @@ function et(key) {
 let examLoading = null;
 
 function loadScriptOnce(src, globalName) {
-  if (typeof window[globalName] !== "undefined" || (globalName === "EXAM_PAPERS" && typeof EXAM_PAPERS !== "undefined") || (globalName === "PICTURES" && typeof PICTURES !== "undefined")) {
+  if (typeof window[globalName] !== "undefined" || (globalName === "EXAM_PAPERS" && typeof EXAM_PAPERS !== "undefined")
+    || (globalName === "EXAM_PAPERS_B" && typeof EXAM_PAPERS_B !== "undefined") || (globalName === "PICTURES" && typeof PICTURES !== "undefined")) {
     return Promise.resolve();
   }
   return new Promise((resolve, reject) => {
@@ -130,14 +133,27 @@ function loadScriptOnce(src, globalName) {
 
 function loadExamData() {
   if (!examLoading) {
-    examLoading = Promise.all([loadScriptOnce("pictures.js", "PICTURES"), loadScriptOnce("exam.js", "EXAM_PAPERS")]);
+    examLoading = Promise.all([
+      loadScriptOnce("pictures.js", "PICTURES"),
+      loadScriptOnce("exam.js", "EXAM_PAPERS"),
+      loadScriptOnce("exam_b.js", "EXAM_PAPERS_B").catch(() => null),
+    ]);
   }
   return examLoading;
 }
 
 // ---------- paper model ----------
-function flattenPaper(level) {
-  const paper = EXAM_PAPERS[level];
+// Two original papers per level: Set A (exam.js) and Set B (exam_b.js, different texts, same format).
+function examSetAvailable(level, set) {
+  return set === "B" ? typeof EXAM_PAPERS_B !== "undefined" && !!EXAM_PAPERS_B[level] : true;
+}
+
+function examSetFor(level) {
+  return state.examSet === "B" && examSetAvailable(level, "B") ? "B" : "A";
+}
+
+function flattenPaper(level, set = examSetFor(level)) {
+  const paper = set === "B" && examSetAvailable(level, "B") ? EXAM_PAPERS_B[level] : EXAM_PAPERS[level];
   let n = 0;
   const sections = paper.sections.map((section) => {
     const questions = [];
@@ -155,7 +171,7 @@ function flattenPaper(level) {
     });
     return { id: section.id, minutes: section.minutes, questions };
   });
-  return { level, total: paper.total, pass: paper.pass, plays: paper.plays, sections };
+  return { level, set: set === "B" && examSetAvailable(level, "B") ? "B" : "A", total: paper.total, pass: paper.pass, plays: paper.plays, sections };
 }
 
 function examKey(q) {
@@ -512,13 +528,17 @@ function renderExamHome() {
     </div>
     ${progress ? `
       <div class="card resume-card">
-        <div><b>${et("resume")}: HSK ${progress.level}</b>
+        <div><b>${et("resume")}: HSK ${progress.level} · ${et("paperSet")} ${progress.set || "A"}</b>
           <div class="muted small">${progress.mode === "full" ? et("simMode") : et("practiceMode")} · ${sectionName(progress.sections[progress.sectionIndex])} · ${et("question")} ${progress.qIndex + 1}</div></div>
         <div class="row"><button class="btn ghost small" id="discard">${et("discard")}</button><a class="btn small" href="#exam/go">${et("resume")}</a></div>
       </div>` : ""}
     <section class="card paper-card" aria-label="HSK ${level} ${et("paper")}">
-      <div class="paper-head"><h2>HSK ${level} <span class="muted">· ${et("paper")}</span></h2>
+      <div class="paper-head"><h2>HSK ${level} <span class="muted">· ${et("paperSet")} ${paper.set}</span></h2>
         <span class="pill">${totalItems} ${et("items")} · ${totalMinutes} ${et("min")}</span></div>
+      ${examSetAvailable(level, "B") ? `<div class="seg seg-small set-seg" role="radiogroup" aria-label="${et("paperSet")}">
+        ${["A", "B"].map((set) => `<button class="seg-btn ${set === paper.set ? "on" : ""}" role="radio" aria-checked="${set === paper.set}" data-set="${set}">${et("paperSet")} ${set}</button>`).join("")}
+      </div>
+      <p class="small muted tight">${et("setNote")}</p>` : ""}
       <table class="paper-table">
         <thead><tr><th>${et("sections")}</th><th class="num">${et("items")}</th><th class="num">${et("min")}</th><th class="num">${et("scoreMax")}</th></tr></thead>
         <tbody>${paper.sections.map((s) => `<tr><td>${sectionName(s.id)}</td><td class="num">${s.questions.length}</td><td class="num">${s.minutes}</td><td class="num">100</td></tr>`).join("")}</tbody>
@@ -547,7 +567,12 @@ function renderExamHome() {
     </section>` : ""}
     <p class="small muted note">${et("note")}</p>
     <a class="btn ghost block" href="#exam/quick">${icon("review", 18)} ${et("quick")}</a>`;
-  bind(".seg-btn", (el) => {
+  bind("[data-set]", (el) => {
+    state.examSet = el.dataset.set;
+    saveState();
+    renderExamHome();
+  });
+  bind(".seg-btn[data-level]", (el) => {
     state.examLevel = Number(el.dataset.level);
     saveState();
     renderExamHome();
@@ -559,16 +584,16 @@ function renderExamHome() {
       renderExamHome();
     };
   }
-  document.getElementById("start-full").onclick = () => startExam(level, "full", paper.sections.map((s) => s.id));
-  bind("[data-practice]", (el) => startExam(level, "practice", [el.dataset.practice]));
+  document.getElementById("start-full").onclick = () => startExam(level, "full", paper.sections.map((s) => s.id), paper.set);
+  bind("[data-practice]", (el) => startExam(level, "practice", [el.dataset.practice], paper.set));
   if (typeof hskkBindHome === "function") {
     hskkBindHome(renderExamHome);
   }
 }
 
-function startExam(level, mode, sectionIds) {
+function startExam(level, mode, sectionIds, set = examSetFor(level)) {
   saveExamProgress({
-    level, mode, sections: sectionIds, sectionIndex: 0, qIndex: 0, responses: {}, flags: [],
+    level, set, mode, sections: sectionIds, sectionIndex: 0, qIndex: 0, responses: {}, flags: [],
     started: Date.now(), sectionStarted: null, spent: {}, played: {}, intro: true,
   });
   if (location.hash === "#exam/go") {
@@ -587,7 +612,7 @@ function runExamSession() {
     renderExamHome();
     return;
   }
-  const paper = flattenPaper(progress.level);
+  const paper = flattenPaper(progress.level, progress.set || "A");
   const sectionsById = Object.fromEntries(paper.sections.map((s) => [s.id, s]));
   const practice = progress.mode === "practice";
   let feedbackShown = false;
@@ -1145,7 +1170,7 @@ function runExamSession() {
     }
     const totals = examTotals({ ...paper, sections: progress.sections.map((id) => sectionsById[id]) }, progress.responses);
     const attempt = {
-      level: progress.level, mode: progress.mode, sections: progress.sections, date: Date.now(),
+      level: progress.level, set: progress.set || "A", mode: progress.mode, sections: progress.sections, date: Date.now(),
       scores: totals.bySection, total: totals.total, passed: progress.mode === "full" && totals.passed,
       seconds: Math.round(Object.values(progress.spent).reduce((a, b) => a + b, 0)),
       responses: progress.responses,
@@ -1202,7 +1227,7 @@ function renderExamResult() {
     renderExamHome();
     return;
   }
-  const full = flattenPaper(attempt.level);
+  const full = flattenPaper(attempt.level, attempt.set || "A");
   const paper = { ...full, sections: full.sections.filter((s) => attempt.sections.includes(s.id)) };
   const maxTotal = paper.sections.length * 100;
   const rows = partBreakdown(paper, attempt.responses);

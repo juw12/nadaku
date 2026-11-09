@@ -874,6 +874,128 @@
     state.days = keepDays;
     saveState();
 
+
+    // ---------- v11: Paket B (second original paper per level, written + HSKK) ----------
+    const cjkStrings = (value, out = []) => {
+      if (typeof value === "string") {
+        const norm = value.replace(/[^\u4e00-\u9fff]/g, "");
+        if (norm.length >= 12) {
+          out.push(norm);
+        }
+      } else if (Array.isArray(value)) {
+        value.forEach((entry) => cjkStrings(entry, out));
+      } else if (value && typeof value === "object") {
+        Object.values(value).forEach((entry) => cjkStrings(entry, out));
+      }
+      return out;
+    };
+    const setBIssues = [];
+    for (const level of LEVELS) {
+      if (!examSetAvailable(level, "B")) {
+        setBIssues.push(`HSK${level}: no Paket B`);
+        continue;
+      }
+      const paperA = flattenPaper(level, "A");
+      const paperB = flattenPaper(level, "B");
+      const shape = (paper) => paper.sections.map((s) => `${s.id}:${s.questions.length}:${s.minutes}`).join(",");
+      if (shape(paperA) !== shape(paperB) || paperB.total !== paperA.total || paperB.pass !== paperA.pass || paperB.set !== "B") {
+        setBIssues.push(`HSK${level}: ${shape(paperB)} vs ${shape(paperA)}`);
+      }
+      const textsA = new Set(cjkStrings(EXAM_PAPERS[level]));
+      const repeats = cjkStrings(EXAM_PAPERS_B[level]).filter((text) => textsA.has(text));
+      if (repeats.length) {
+        setBIssues.push(`HSK${level}: ${repeats.length} texts repeat Paket A (${repeats[0].slice(0, 12)})`);
+      }
+    }
+    check("Paket B: HSK 1-6 each have a second paper with the same sections, item counts, times and pass line, and no Paket A text repeated",
+      setBIssues.length === 0, setBIssues.slice(0, 3).join(" | "));
+
+    const keepSet = state.examSet;
+    const keepSetLevel = state.examLevel;
+    const keepSetProgress = localStorage.getItem(EXAM_PROGRESS_KEY);
+    state.examLevel = 3;
+    state.examSet = "A";
+    saveExamProgress(null);
+    renderExamHome();
+    const setButtons = [...view.querySelectorAll(".set-seg [data-set]")];
+    const headA = view.querySelector(".paper-head h2").textContent;
+    const bButton = setButtons.find((btn) => btn.dataset.set === "B");
+    if (bButton) {
+      bButton.click();
+    }
+    const headB = view.querySelector(".paper-head h2").textContent;
+    startExam(3, "practice", ["R"]);
+    const setProgress = loadExamProgress();
+    check("Paket B: the exam home picker switches A/B and a session started on B is saved as Paket B",
+      setButtons.length === 2 && headA.includes("A") && headB.includes("B") && state.examSet === "B"
+      && !!setProgress && setProgress.set === "B" && setProgress.level === 3,
+      `${headA} -> ${headB}, progress ${setProgress && setProgress.set}`);
+    if (keepSetProgress === null) {
+      localStorage.removeItem(EXAM_PROGRESS_KEY);
+    } else {
+      localStorage.setItem(EXAM_PROGRESS_KEY, keepSetProgress);
+    }
+    state.examSet = keepSet;
+    state.examLevel = keepSetLevel;
+    location.hash = "exam";
+    route();
+    await new Promise((resolve) => setTimeout(resolve, 40));
+
+    const hskkBIssues = [];
+    const hskkTextsA = new Set(cjkStrings(HSKK_PAPERS).concat(HSKK_LEVELS.flatMap((id) => HSKK_PAPERS[id].parts.flatMap((p) => p.items.map((it) => it.zh.replace(/[^\u4e00-\u9fff]/g, "")))).filter((t) => t.length >= 6)));
+    for (const id of HSKK_LEVELS) {
+      const paperA = HSKK_PAPERS[id];
+      const paperB = typeof HSKK_PAPERS_B !== "undefined" ? HSKK_PAPERS_B[id] : null;
+      if (!paperB) {
+        hskkBIssues.push(`${id}: no Paket B`);
+        continue;
+      }
+      const shape = (paper) => paper.parts.map((p) => `${p.kind}:${p.items.length}:${p.minutes}:${p.points}`).join(",");
+      if (shape(paperA) !== shape(paperB) || paperB.total !== 100 || paperB.pass !== 60 || paperB.prep !== paperA.prep) {
+        hskkBIssues.push(`${id}: ${shape(paperB)}`);
+      }
+      paperB.parts.forEach((p) => p.items.forEach((it) => {
+        const ok = it.zh && it.py && it.id && it.en && it.sec > 0
+          && (!["open", "picture", "answer"].includes(p.kind) || (it.model && it.model_py))
+          && (p.kind !== "picture" || it.pics.every((pic) => PICTURES[pic]));
+        const zhNorm = it.zh.replace(/[^\u4e00-\u9fff]/g, "");
+        if (!ok) {
+          hskkBIssues.push(`${id} ${p.kind}: incomplete item`);
+        }
+        if (p.kind !== "picture" && zhNorm.length >= 6 && hskkTextsA.has(zhNorm)) {
+          hskkBIssues.push(`${id} ${p.kind}: repeats Paket A (${it.zh.slice(0, 10)})`);
+        }
+      }));
+    }
+    check("HSKK Paket B: Beginner/Intermediate/Advanced have a second set in the same format, every item complete, no Paket A sentence repeated",
+      hskkBIssues.length === 0, hskkBIssues.slice(0, 3).join(" | "));
+
+    const keepHskkSet = state.hskkSet;
+    const keepHskkAttemptsB = state.hskkAttempts;
+    const keepXpB = state.xp;
+    const keepDaysB = JSON.parse(JSON.stringify(state.days));
+    state.hskkSet = "B";
+    const sessionB = hskkRun("beginner", { speed: 0.002, noMic: true });
+    sessionB.controls.begin();
+    sessionB.controls.ready();
+    for (let waited = 0; sessionB.phase !== "review" && waited < 6000; waited += 50) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    const firstReviewB = view.querySelector(".hk-rev-item");
+    const showsB = !!firstReviewB && firstReviewB.textContent.includes(HSKK_PAPERS_B.beginner.parts[0].items[0].zh);
+    view.querySelectorAll("[data-fill]").forEach((btn) => btn.click());
+    document.getElementById("hk-score").click();
+    const savedB = (state.hskkAttempts || []).slice(-1)[0];
+    check("HSKK Paket B: picking B runs the B items and saves the attempt as Paket B",
+      showsB && !!savedB && savedB.set === "B" && savedB.level === "beginner" && savedB.total === 100,
+      `review shows B ${showsB}, saved ${savedB && savedB.set}`);
+    sessionB.cleanup();
+    state.hskkSet = keepHskkSet;
+    state.hskkAttempts = keepHskkAttemptsB;
+    state.xp = keepXpB;
+    state.days = keepDaysB;
+    saveState();
+
     const copy = JSON.stringify(GUIDE_TEXT).toLowerCase();
     const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
     check("guide: copy is honest (rule-based, offline, no server AI claim) and has no emoji",

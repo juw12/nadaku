@@ -993,3 +993,93 @@ body.exam-focus .nada-fab { display: none; }
 @media (prefers-reduced-motion: reduce) { .guide-steps li.just-done .gs-mark { animation: none; } }
 .tile-next.inline { position: static; margin-left: 8px; vertical-align: 1px; }
 .practice-row .btn.nada-pick { min-height: 44px; }
+
+/* v10: HSKK speaking mock */
+.seg.seg-small { margin: 10px 0; }
+.seg.seg-small .seg-btn { min-height: 38px; font-size: 14px; }
+.hskk-card .paper-table td span[lang] { font-weight: 600; }
+.hk-item, .hk-prep, .hk-intro { max-width: 620px; margin: 0 auto; }
+.hk-part-title { font-size: 18px; margin: 2px 0 2px; }
+.hk-prompt { margin: 16px 0 12px; min-height: 96px; display: flex; flex-direction: column; justify-content: center; }
+.hk-listen { display: flex; align-items: center; gap: 10px; color: var(--muted); justify-content: center; padding: 22px 0; border: 1px dashed var(--line); border-radius: var(--radius); }
+.hk-q { font-size: 20px; line-height: 1.5; margin: 6px 0; }
+.hk-q .ex-py { font-size: 14px; }
+.hk-passage { font-size: 19px; line-height: 1.9; margin: 0; padding: 14px 16px; background: var(--soft); border-radius: var(--radius); }
+.hk-scene { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); }
+.hk-scene.small { justify-content: flex-start; padding: 6px 8px; gap: 8px; margin-bottom: 6px; }
+.hk-rec { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); font-weight: 600; }
+.hk-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); flex: none; }
+.hk-rec.on .hk-dot { background: var(--red); animation: hk-pulse 1.2s ease-in-out infinite; }
+@keyframes hk-pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .hk-rec.on .hk-dot { animation: none; } }
+.hk-clock { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 18px; }
+.hk-meter { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin: 8px 0 14px; }
+.hk-meter i { display: block; height: 100%; width: 0; background: var(--ink); opacity: .45; transition: width .1s linear; }
+.hk-prep-head { align-items: baseline; }
+.hk-prep-part { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; }
+.hk-part-label { margin: 0 0 6px; font-size: 14px; }
+.hk-review-part h2 { margin: 0; }
+.hk-rev-list { list-style: none; padding: 0; margin: 8px 0 0; counter-reset: hk; }
+.hk-rev-item { border-top: 1px solid var(--line); padding: 12px 0; }
+.hk-rev-text { margin: 0 0 6px; display: flex; flex-direction: column; gap: 2px; }
+.hk-rev-text span[lang] { font-size: 18px; }
+.hk-model { margin: 4px 0 8px; font-size: 14px; }
+.hk-model summary { cursor: pointer; color: var(--muted); }
+.hk-model p { margin: 6px 0 0; display: flex; flex-direction: column; gap: 2px; }
+.hk-rev-audio { gap: 10px; flex-wrap: wrap; align-items: center; }
+.hk-rev-audio audio { height: 36px; max-width: 100%; }
+.hk-rev-foot { gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.hk-rate { margin: 0; min-width: 210px; }
+.hk-review-foot { position: sticky; bottom: 76px; display: flex; align-items: center; gap: 12px; z-index: 3; }
+.hk-score { margin: 6px 0 10px; }
+.hk-score b { font-size: 56px; font-family: "Source Serif 4"; line-height: 1; }
+.hk-score span { color: var(--muted); margin-left: 6px; }
+.hk-part-scores { list-style: none; padding: 0; margin: 16px 0 8px; text-align: left; }
+.hk-part-scores li { display: grid; grid-template-columns: 1fr 90px 36px 36px; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.hk-bar { height: 6px; background: var(--line); display: block; }
+.hk-bar i { display: block; height: 100%; background: var(--ink); opacity: .55; }
+.hk-result-actions { justify-content: center; gap: 10px; margin: 12px 0 24px; }
+@media (max-width: 480px) {
+  .hk-part-scores li { grid-template-columns: 1fr 60px 32px 32px; }
+  .hk-rate { min-width: 0; width: 100%; }
+  .hk-q { font-size: 18px; }
+  .hk-passage { font-size: 17px; }
+}
+body.hskk-on .nada-fab { display: none; }
+
+/* v10 round 14: calmer HSKK review/result and exam home */
+.hk-parts-detail { margin: 10px 0 4px; }
+.hk-parts-detail > summary,
+.hk-rubric > summary,
+.hk-rev-long > summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.875rem;
+  padding: 6px 0;
+  list-style-position: inside;
+}
+.hk-parts-detail[open] > summary,
+.hk-rubric[open] > summary { color: var(--ink); }
+.hk-rubric { margin: 2px 0 6px; }
+.hk-rev-long > summary [lang="zh-CN"] { font-size: 1.05rem; color: var(--ink); }
+.hk-focus { margin-top: 14px; }
+.hk-focus .h3 { margin: 2px 0 6px; }
+.hk-focus p.small { margin: 0 0 10px; }
+.hk-result-actions { justify-content: center; gap: 22px; margin-top: 14px; }
+.btn-text {
+  background: none;
+  border: 0;
+  padding: 10px 4px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.btn-text:hover,
+.btn-text:focus-visible { color: var(--ink); }

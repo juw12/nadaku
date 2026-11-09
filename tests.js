@@ -754,7 +754,7 @@
     location.hash = "exam";
     route();
     await new Promise((resolve) => setTimeout(resolve, 60));
-    const picks = view.querySelectorAll("[data-practice].nada-pick");
+    const picks = view.querySelectorAll("[data-practice].nada-pick, #hskk-start.nada-pick");
     const fullBtn = document.getElementById("start-full");
     check("guide: when Nada's next step is an exam section, exam home fills only that section button",
       (!guideSummary(now).steps.some((s) => s.id === "exam") || (examNext && examNext.id === "exam"))
@@ -763,6 +763,105 @@
     state.examLevel = keepExamLevel;
     state.activity[today] = {};
     sessionStorage.removeItem(doneKey);
+
+    // ---------- HSKK speaking mock ----------
+    await loadHskkData();
+    const formatOk = HSKK_LEVELS.every((id) => {
+      const paper = HSKK_PAPERS[id];
+      const meta = HSKK_META[id];
+      const partsOk = paper.parts.length === 3 && paper.parts.every((p, i) => p.kind === meta.parts[i][0]
+        && p.items.length === meta.parts[i][1] && p.minutes === meta.parts[i][2]);
+      const minutes = paper.parts.reduce((s, p) => s + p.minutes, 0) + paper.prep;
+      const points = paper.parts.reduce((s, p) => s + p.points, 0);
+      return partsOk && minutes === meta.minutes && paper.minutes === meta.minutes && paper.prep === meta.prep
+        && points === 100 && paper.total === 100 && paper.pass === 60;
+    });
+    check("HSKK: Beginner 27 / Intermediate 14 / Advanced 6 items in the official parts, timing, 100 points, pass 60",
+      formatOk && HSKK_META.beginner.items === 27 && HSKK_META.intermediate.items === 14 && HSKK_META.advanced.items === 6);
+
+    const allItems = HSKK_LEVELS.flatMap((id) => HSKK_PAPERS[id].parts.flatMap((p) => p.items.map((it) => ({ kind: p.kind, it }))));
+    const contentOk = allItems.every(({ kind, it }) => it.zh && it.py && it.id && it.en && it.sec > 0
+      && (!["open", "picture"].includes(kind) || (it.model && it.model_py))
+      && (kind !== "picture" || it.pics.every((pic) => PICTURES[pic])));
+    check("HSKK: every item has pinyin, Indonesian and English; open and picture items carry a model answer",
+      contentOk, `${allItems.length} items`);
+
+    const beginnerPaper = HSKK_PAPERS.beginner;
+    const fullMarks = {};
+    const halfMarks = {};
+    beginnerPaper.parts.forEach((p, pi) => p.items.forEach((_it, i) => {
+      fullMarks[`${pi}-${i}`] = hskkMaxRating(p.kind);
+      halfMarks[`${pi}-${i}`] = hskkMaxRating(p.kind) / 2;
+    }));
+    const full = hskkScore(beginnerPaper, fullMarks);
+    const half = hskkScore(beginnerPaper, halfMarks);
+    const none = hskkScore(beginnerPaper, {});
+    check("HSKK: score = time-weighted parts; full marks 100 (pass), half 50 (fail), none 0; char match by LCS",
+      full.total === 100 && full.passed && half.total === 50 && !half.passed && none.total === 0
+      && Math.abs(hskkCharMatch("我今天很忙。", "我今天忙") - 0.8) < 1e-9 && hskkSuggestRating("repeat", { voiced: 3, match: 0.95 }) === 2
+      && hskkSuggestRating("open", { voiced: 0 }) === 0, `${full.total}/${half.total}/${none.total}`);
+
+    const keepLevel = state.examLevel;
+    const keepHskk = state.hskkLevel;
+    state.examLevel = 1;
+    delete state.hskkLevel;
+    location.hash = "exam";
+    route();
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    const hskkCard = view.querySelector(".hskk-card");
+    check("HSKK: exam home offers the speaking mock (3 levels, level picked from HSK) and explains HSK 1-2 has no writing paper",
+      !!hskkCard && hskkCard.querySelectorAll("[data-hskk]").length === 3
+      && hskkCard.querySelector("[data-hskk].on").dataset.hskk === "beginner"
+      && document.getElementById("hskk-start").getAttribute("href") === "#exam/hskk-beginner"
+      && view.textContent.includes(ht("hsk12Write")));
+    state.examLevel = keepLevel;
+    if (keepHskk) {
+      state.hskkLevel = keepHskk;
+    }
+
+    const rotationOk = LEVELS.every((lv) => {
+      const lvPaper = flattenPaper(lv);
+      const picks = new Set();
+      for (let d = 0; d < lvPaper.sections.length + 1; d += 1) {
+        picks.add(examPickFor(lvPaper, 20000 + d));
+      }
+      return picks.has("S") && lvPaper.sections.every((s) => picks.has(s.id)) && picks.size === lvPaper.sections.length + 1;
+    });
+    check("HSKK: Nada's exam step rotates through every written section and the speaking mock, every level", rotationOk);
+
+    const keepAttempts = state.hskkAttempts;
+    const keepXp = state.xp;
+    const keepDays = JSON.parse(JSON.stringify(state.days));
+    const session = hskkRun("beginner", { speed: 0.002, noMic: true });
+    const introOk = !!view.querySelector(".hk-intro") && view.querySelectorAll(".ex-parts li").length === 3;
+    session.controls.begin();
+    const prepOk = !!view.querySelector(".hk-prep") && view.querySelectorAll(".hk-prep .hk-q").length === 2;
+    session.controls.ready();
+    const firstItemOk = !!view.querySelector(".hk-item .hk-listen") && !view.querySelector(".hk-item [lang='zh-CN'].hk-passage");
+    for (let waited = 0; session.phase !== "review" && waited < 6000; waited += 50) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    const reviewItems = view.querySelectorAll(".hk-rev-item").length;
+    const scoreBtn = document.getElementById("hk-score");
+    const lockedBeforeRating = !!scoreBtn && scoreBtn.disabled;
+    view.querySelectorAll("[data-fill]").forEach((btn) => btn.click());
+    document.getElementById("hk-score").click();
+    const resultScore = view.querySelector(".hk-score b");
+    const saved = (state.hskkAttempts || []).slice(-1)[0];
+    check("HSKK: a full Beginner session runs offline without a mic (intro, prep, 27 timed items, rated review, result saved)",
+      introOk && prepOk && firstItemOk && reviewItems === 27 && lockedBeforeRating
+      && !!resultScore && resultScore.textContent === "100" && !!saved && saved.level === "beginner" && saved.total === 100,
+      `review ${reviewItems}, phase ${session.phase}`);
+    const focusCard = view.querySelector(".hk-focus");
+    check("HSKK: the result names the weakest part with one practice step, and retake/back are quiet links",
+      !!focusCard && focusCard.textContent.includes(HSKK_PART_ZH[1]) && !!focusCard.querySelector('a[href="#talk"]')
+      && !!document.querySelector("#hk-back.btn-text") && !!document.querySelector("#hk-again.btn-text")
+      && view.querySelectorAll(".hk-result-actions .btn:not(.btn-text)").length === 0);
+    session.cleanup();
+    state.hskkAttempts = keepAttempts;
+    state.xp = keepXp;
+    state.days = keepDays;
+    saveState();
 
     const copy = JSON.stringify(GUIDE_TEXT).toLowerCase();
     const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;

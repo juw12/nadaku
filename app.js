@@ -1327,11 +1327,14 @@ function renderVocab() {
     });
     renderList();
   });
-  document.getElementById("q").addEventListener("input", (e) => {
-    query = e.target.value.trim();
-    shown = LIST_PAGE;
-    renderList();
-  });
+  const search = document.getElementById("q");
+  if (search) {
+    search.addEventListener("input", (e) => {
+      query = e.target.value.trim();
+      shown = LIST_PAGE;
+      renderList();
+    });
+  }
   renderList();
 }
 
@@ -1893,12 +1896,16 @@ function renderWrite(arg) {
   };
 
   loadStrokes(ch).then((data) => {
+    const group = document.getElementById("glyph-g");
+    const ink = document.getElementById("ink");
+    // The learner may have left the screen before the stroke data arrived.
+    if (!group || !ink) {
+      return;
+    }
     if (!data) {
       document.getElementById("write-status").textContent = "—";
       return;
     }
-    const group = document.getElementById("glyph-g");
-    const ink = document.getElementById("ink");
     let strokeIndex = 0;
     let misses = 0;
     let firstTry = 0;

@@ -424,6 +424,10 @@ function renderExamScreen(arg) {
     renderQuickQuiz();
     return;
   }
+  if (arg && arg.startsWith("hskk") && typeof renderHskkScreen === "function") {
+    renderHskkScreen(arg);
+    return;
+  }
   view.innerHTML = `<h1>${et("title")}</h1><p class="muted">${et("loading")}</p>`;
   loadExamData()
     .then(() => {
@@ -443,6 +447,13 @@ function renderExamScreen(arg) {
     });
 }
 
+// Which part Nada's exam step points at on a given day. The speaking mock (HSKK, "S") takes its turn
+// in the rotation, so listening, reading, writing and speaking all come up.
+function examPickFor(paper, dayIndex) {
+  const ids = paper.sections.map((s) => s.id).concat(typeof hskkHomeCardHtml === "function" ? ["S"] : []);
+  return ids[((dayIndex % ids.length) + ids.length) % ids.length];
+}
+
 function renderExamHome() {
   const level = state.examLevel || state.level;
   const paper = flattenPaper(level);
@@ -454,7 +465,7 @@ function renderExamHome() {
   // and the full mock exam steps back, so the page offers a single next action.
   const nadaNext = typeof guideSummary === "function" ? guideSummary().next : null;
   const nadaSection = nadaNext && nadaNext.id === "exam" && level === state.level && !progress
-    ? paper.sections[Math.floor(Date.now() / DAY) % paper.sections.length].id : null;
+    ? examPickFor(paper, Math.floor(Date.now() / DAY)) : null;
   const nextTag = nadaSection && typeof gt === "function" ? `<small class="tile-next inline">${gt("next")}</small>` : "";
   view.innerHTML = `
     <h1>${et("title")}</h1>
@@ -477,6 +488,7 @@ function renderExamHome() {
         <tfoot><tr><td>${et("total")}</td><td class="num">${totalItems}</td><td class="num">${totalMinutes}</td><td class="num">${paper.total}</td></tr></tfoot>
       </table>
       <p class="small muted">${et("passLine")}: <b>${paper.pass}</b> / ${paper.total}</p>
+      ${level <= 2 && typeof ht === "function" ? `<p class="small muted tight">${ht("hsk12Write")}</p>` : ""}
       <button class="btn block${nadaSection ? " ghost" : ""}" id="start-full">${icon("exam", 18)} ${et("startFull")}</button>
       <p class="small muted center tight">${et("startFullSub")}</p>
     </section>
@@ -487,14 +499,14 @@ function renderExamHome() {
         ${paper.sections.map((s) => `<button class="btn small${s.id === nadaSection ? " nada-pick" : " ghost"}" data-practice="${s.id}">${sectionName(s.id)}${s.id === nadaSection ? nextTag : ""}</button>`).join("")}
       </div>
     </section>
-    <section class="card">
+    ${typeof hskkHomeCardHtml === "function" ? hskkHomeCardHtml(level, nadaSection === "S" ? nextTag : "") : ""}
+    ${attempts.length ? `<section class="card">
       <h2 class="h3">${et("history")}</h2>
-      ${attempts.length ? `<ul class="history">${attempts.map((a) => `
+      <ul class="history">${attempts.map((a) => `
         <li><span>${new Date(a.date).toLocaleDateString(state.lang === "id" ? "id-ID" : "en-GB", { day: "numeric", month: "short" })}</span>
           <span class="hist-bar"><span style="width:${Math.round((a.total / paper.total) * 100)}%" class="${a.passed ? "ok" : ""}"></span></span>
-          <b>${a.total}</b><span class="pill tiny ${a.passed ? "green" : ""}">${a.passed ? et("pass") : et("fail")}</span></li>`).join("")}</ul>`
-        : `<p class="muted small">${et("noHistory")}</p>`}
-    </section>
+          <b>${a.total}</b><span class="pill tiny ${a.passed ? "green" : ""}">${a.passed ? et("pass") : et("fail")}</span></li>`).join("")}</ul>
+    </section>` : ""}
     <p class="small muted note">${et("note")}</p>
     <a class="btn ghost block" href="#exam/quick">${icon("review", 18)} ${et("quick")}</a>`;
   bind(".seg-btn", (el) => {
@@ -511,6 +523,9 @@ function renderExamHome() {
   }
   document.getElementById("start-full").onclick = () => startExam(level, "full", paper.sections.map((s) => s.id));
   bind("[data-practice]", (el) => startExam(level, "practice", [el.dataset.practice]));
+  if (typeof hskkBindHome === "function") {
+    hskkBindHome(renderExamHome);
+  }
 }
 
 function startExam(level, mode, sectionIds) {

@@ -484,6 +484,23 @@
         `${timeline.total.toFixed(2)} s vs ${raw.toFixed(2)} s raw, max gap ${Math.max(0, ...gaps).toFixed(3)} s`);
     }
 
+    // v11.2: characters that are not words on their own borrow a syllable instead of leaving holes
+    const orphanChars = ["今", "午"];
+    const orphanClips = orphanChars.map((ch) => charClipFor(ch));
+    const orphanLine = wordClipsFor("今午");
+    check("exam audio: a character with no word of its own (今, 午) still gets a recorded syllable",
+      orphanClips.every((clip) => clip && clip.src) && orphanLine.length === 2 && orphanLine.every((clip) => clip.wordStart),
+      `${orphanClips.filter(Boolean).length}/2 chars, ${orphanLine.length} clips`);
+
+    // v11.2: a one-character essay or summary earns nothing; a real attempt still earns length credit
+    const essayQ = { kind: "essay", item: {} };
+    const summaryQ = { kind: "summary", item: { sample: "这是一个关于学习中文的故事。" } };
+    const tinyEssay = scoreExamQuestion(essayQ, "我");
+    const tinySummary = scoreExamQuestion(summaryQ, "我");
+    const fullEssay = scoreExamQuestion(essayQ, "我".repeat(80));
+    check("exam writing: a 1-character essay or summary scores 0, an 80-character essay keeps full length credit",
+      tinyEssay === 0 && tinySummary === 0 && fullEssay === 1, `${tinyEssay} / ${tinySummary} / ${fullEssay}`);
+
     const OFFICIAL = {
       1: { items: 40, minutes: { L: 15, R: 17 }, total: 200, pass: 120 },
       2: { items: 60, minutes: { L: 25, R: 22 }, total: 200, pass: 120 },

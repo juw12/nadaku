@@ -1921,7 +1921,10 @@ function renderWrite(arg) {
     }
 
     function status(text) {
-      document.getElementById("write-status").textContent = text;
+      const el = document.getElementById("write-status");
+      if (el) {
+        el.textContent = text;
+      }
     }
 
     function reset() {
@@ -1935,6 +1938,11 @@ function renderWrite(arg) {
       status(`0/${data.s.length} ${t("strokes")}`);
       if (mode === "watch") {
         animTimer = setInterval(() => {
+          // Leaving the screen mid-animation must stop the timer, not keep writing to a removed status line.
+          if (!group.isConnected) {
+            clearInterval(animTimer);
+            return;
+          }
           strokeIndex += 1;
           paint();
           status(`${strokeIndex}/${data.s.length} ${t("strokes")}`);
@@ -2100,7 +2108,10 @@ function renderTalk(arg) {
             }
           }
         });
-        document.getElementById("heard").textContent = `${t("youSaid")}: “${alternatives[0]}” (${Math.round(best.sim * 100)}%)`;
+        const heard = document.getElementById("heard");
+        if (heard) {
+          heard.textContent = `${t("youSaid")}: “${alternatives[0]}” (${Math.round(best.sim * 100)}%)`;
+        }
         if (best.sim >= 0.5) {
           choose(best.idx);
         } else {
@@ -2151,6 +2162,14 @@ function shadowHtml() {
   </div>`;
 }
 
+// The recording finishes asynchronously; the learner may have left the screen by then.
+function setShadowText(id, value) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.textContent = value;
+  }
+}
+
 function bindShadow(line) {
   const rec = document.getElementById("shadow-rec");
   const mine = document.getElementById("shadow-mine");
@@ -2164,7 +2183,7 @@ function bindShadow(line) {
     }
     session = await startRecording();
     if (!session) {
-      document.getElementById("shadow-result").textContent = t("micBlocked");
+      setShadowText("shadow-result", t("micBlocked"));
       return;
     }
     rec.classList.add("recording");
@@ -2199,7 +2218,7 @@ function bindShadow(line) {
       document.getElementById("shadow-pitch").innerHTML = `<polyline points="${pts}" fill="none" stroke="var(--red)" stroke-width="2.5"/>`;
     }
     const verdict = voiced < 0.25 ? t("noVoice") : ratio < 0.5 ? t("shadowShort") : ratio > 2.2 ? t("shadowLong") : t("shadowGood");
-    document.getElementById("shadow-result").textContent = `${verdict} (${voiced.toFixed(1)} s)`;
+    setShadowText("shadow-result", `${verdict} (${voiced.toFixed(1)} s)`);
     if (voiced >= 0.25 && ratio >= 0.5 && ratio <= 2.2) {
       addXP(1);
     }

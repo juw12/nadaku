@@ -186,6 +186,8 @@ function charCount(text) {
   return [...String(text || "").replace(/\s/g, "")].length;
 }
 
+// Writing tasks need a real attempt: under 20% of the target length earns no
+// length credit, so a one-character "essay" cannot collect points.
 function lengthFactor(length, target) {
   if (length >= target * 0.8) {
     return 1;
@@ -193,7 +195,7 @@ function lengthFactor(length, target) {
   if (length >= target * 0.5) {
     return 0.6;
   }
-  return length > 0 ? 0.3 : 0;
+  return length >= target * 0.2 ? 0.3 : 0;
 }
 
 // Returns a score 0..1 for one question.
@@ -357,6 +359,57 @@ function splitSpeaker(line) {
   return match ? { who: match[1], text: line.slice(match[0].length) } : { who: "", text: line };
 }
 
+// Per-character fallback for the recorded-word path: a character that is not a word on its own (今, 午, 符...)
+// borrows its syllable from a word that contains it, instead of being skipped (which left holes in the
+// sentence). Single-character recordings win over syllables cut from longer words; neutral-tone parts are skipped.
+let examCharClips = null;
+
+function charClipFor(ch) {
+  if (!examCharClips) {
+    examCharClips = new Map();
+    const words = [...BY_HANZI.values()];
+    for (const w of words) {
+      if ([...w.hanzi].length === 1 && w.audio) {
+        examCharClips.set(w.hanzi, audioClips(w.audio, w.hanzi)[0]);
+      }
+    }
+    for (const w of words) {
+      const chars = [...w.hanzi];
+      if (chars.length < 2 || typeof w.audio !== "string") {
+        continue;
+      }
+      const parts = audioClips(w.audio, w.hanzi);
+      if (parts.length !== chars.length) {
+        continue;
+      }
+      chars.forEach((c, k) => {
+        if (!examCharClips.has(c) && !parts[k].light) {
+          examCharClips.set(c, parts[k]);
+        }
+      });
+    }
+    // Last resort (今 in 今天, 李 in 行李): the word was recorded whole, but its pinyin says how this
+    // character sounds, and a native recording of that syllable+tone usually exists.
+    if (typeof SYLLABLE_SOURCES === "object") {
+      for (const w of words) {
+        const chars = [...w.hanzi];
+        const syllables = typeof w.pinyin === "string" ? syllablesOf(w) : [];
+        if (chars.length < 2 || syllables.length !== chars.length) {
+          continue;
+        }
+        chars.forEach((c, k) => {
+          const tone = toneOf(syllables[k]);
+          const key = `${stripTone(syllables[k]).toLowerCase().replace("ü", "v")}${tone}`;
+          if (!examCharClips.has(c) && tone >= 1 && tone <= 4 && SYLLABLE_SOURCES[key]) {
+            examCharClips.set(c, audioClips(SYLLABLE_SOURCES[key], c)[0]);
+          }
+        });
+      }
+    }
+  }
+  return examCharClips.get(ch) || null;
+}
+
 function wordClipsFor(text) {
   const clips = [];
   const chars = [...text.replace(/[^\u4e00-\u9fff]/g, "")];
@@ -375,6 +428,12 @@ function wordClipsFor(text) {
       audioClips(found.audio, found.hanzi).forEach((clip, k) => clips.push({ ...clip, wordStart: k === 0 }));
       i += [...found.hanzi].length;
     } else {
+      // 儿 after another character is the erhua suffix: it merges into the previous syllable, so it is not spoken alone
+      const erhua = chars[i] === "儿" && i > 0;
+      const single = erhua ? null : charClipFor(chars[i]);
+      if (single) {
+        clips.push({ ...single, wordStart: true });
+      }
       i += 1;
     }
   }

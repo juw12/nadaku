@@ -456,6 +456,34 @@
   {
     // v7: HSK mock exam - paper structure, item validity, scoring, routes
     await loadExamData();
+
+    // v11.1: without a Chinese voice, listening plays the recorded words as one trimmed, gapless timeline
+    const listenLine = "我明天下午去商店买东西";
+    const listenClips = wordClipsFor(listenLine);
+    const wordStarts = listenClips.filter((clip) => clip.wordStart).length;
+    check("exam audio: recorded clips mark where each word starts (syllables inside a word stay joined)",
+      listenClips.length >= 7 && wordStarts === 7, `${listenClips.length} clips, ${wordStarts} word starts`);
+    const synthRate = 22050;
+    const synth = new OfflineAudioContext(1, synthRate, synthRate).createBuffer(1, synthRate, synthRate);
+    const synthData = synth.getChannelData(0);
+    for (let i = Math.round(0.3 * synthRate); i < Math.round(0.7 * synthRate); i += 1) {
+      synthData[i] = 0.5 * Math.sin(i * 0.2);
+    }
+    const bounds = speechBounds(synth);
+    check("exam audio: silence is trimmed from both edges of a clip, onset and tail kept",
+      Math.abs(bounds.start - 0.28) < 0.02 && Math.abs(bounds.end - 0.75) < 0.02, `${bounds.start.toFixed(3)}..${bounds.end.toFixed(3)} s`);
+    if (location.protocol === "file:") {
+      check("exam audio: gapless timeline (skipped: file:// cannot fetch clips, old player is used)", true, "file://");
+    } else {
+      const decoded = await Promise.all(listenClips.map((clip) => loadExamClip(clip.src)));
+      const raw = decoded.every(Boolean) ? decoded.reduce((sum, clip) => sum + clip.buffer.duration, 0) : 0;
+      const timeline = decoded.every(Boolean) ? planClipTimeline(decoded, listenClips) : { parts: [], total: Infinity };
+      const gaps = timeline.parts.slice(1).map((part, k) => part.at - (timeline.parts[k].at + timeline.parts[k].length));
+      check("exam audio: a 7-word line plays as one timeline, much shorter than the padded clips back to back",
+        raw > 0 && timeline.total < raw * 0.75 && gaps.every((gap) => gap > 0 && gap <= EXAM_WORD_GAP + 1e-6),
+        `${timeline.total.toFixed(2)} s vs ${raw.toFixed(2)} s raw, max gap ${Math.max(0, ...gaps).toFixed(3)} s`);
+    }
+
     const OFFICIAL = {
       1: { items: 40, minutes: { L: 15, R: 17 }, total: 200, pass: 120 },
       2: { items: 60, minutes: { L: 25, R: 22 }, total: 200, pass: 120 },

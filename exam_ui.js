@@ -315,6 +315,33 @@ function saveExamProgress(progress) {
 
 // ---------- audio ----------
 let examPlayToken = 0;
+let examVoicesSettled = false;
+
+// Chrome fills getVoices() only after "voiceschanged"; deciding before that dropped devices that do have a
+// Chinese voice onto the word-by-word recordings. Wait for the list once (max 1.2 s), then decide.
+function whenVoicesReady(callback) {
+  if (examVoicesSettled || !("speechSynthesis" in window) || speechSynthesis.getVoices().length) {
+    examVoicesSettled = true;
+    callback();
+    return;
+  }
+  let done = false;
+  const finish = () => {
+    if (done) {
+      return;
+    }
+    done = true;
+    examVoicesSettled = true;
+    if (speechSynthesis.removeEventListener) {
+      speechSynthesis.removeEventListener("voiceschanged", finish);
+    }
+    callback();
+  };
+  if (speechSynthesis.addEventListener) {
+    speechSynthesis.addEventListener("voiceschanged", finish);
+  }
+  setTimeout(finish, 1200);
+}
 
 function examVoices() {
   const voices = "speechSynthesis" in window ? speechSynthesis.getVoices().filter((v) => /^zh/i.test(v.lang)) : [];
@@ -344,7 +371,8 @@ function wordClipsFor(text) {
       }
     }
     if (found) {
-      clips.push(...audioClips(found.audio, found.hanzi));
+      // the first clip of each word gets the between-word pause; syllables inside a word stay joined
+      audioClips(found.audio, found.hanzi).forEach((clip, k) => clips.push({ ...clip, wordStart: k === 0 }));
       i += [...found.hanzi].length;
     } else {
       i += 1;
@@ -353,7 +381,178 @@ function wordClipsFor(text) {
   return clips;
 }
 
+// ---------- recorded-word fallback: gapless playback ----------
+// The word recordings carry about 0.25 s of silence at each end, and playing them one <audio> element at a
+// time adds a fetch + decode + start delay per word: a 7-word line took 19 s for 5 s of speech. So the clips
+// are fetched and decoded in parallel, trimmed to the spoken part and scheduled back to back on one
+// AudioContext timeline, with a short natural pause between words.
+const EXAM_WORD_GAP = 0.08;
+const EXAM_SYLLABLE_GAP = 0.015;
+const EXAM_KEEP_BEFORE = 0.02;
+const EXAM_KEEP_AFTER = 0.05;
+const EXAM_FADE = 0.008;
+const EXAM_CLIP_CACHE_MAX = 160;
+const examClipCache = new Map();
+let examAudioCtx = null;
+
+function examAudioContext() {
+  if (!examAudioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) {
+      return null;
+    }
+    try {
+      examAudioCtx = new Ctx();
+    } catch (err) {
+      return null;
+    }
+  }
+  return examAudioCtx;
+}
+
+// Start and end (seconds) of the spoken part of a clip, from 10 ms RMS frames against the loudest frame.
+function speechBounds(buffer) {
+  const data = buffer.getChannelData(0);
+  const frame = Math.max(1, Math.round(buffer.sampleRate * 0.01));
+  const levels = [];
+  for (let start = 0; start < data.length; start += frame) {
+    let sum = 0;
+    const end = Math.min(data.length, start + frame);
+    for (let i = start; i < end; i += 1) {
+      sum += data[i] * data[i];
+    }
+    levels.push(Math.sqrt(sum / (end - start)));
+  }
+  const loudest = Math.max(0, ...levels);
+  if (!loudest) {
+    return { start: 0, end: buffer.duration };
+  }
+  const threshold = loudest * 0.06;
+  let first = levels.findIndex((level) => level >= threshold);
+  let last = levels.length - 1;
+  while (last > first && levels[last] < threshold) {
+    last -= 1;
+  }
+  first = Math.max(0, first);
+  return {
+    start: Math.max(0, (first * frame) / buffer.sampleRate - EXAM_KEEP_BEFORE),
+    end: Math.min(buffer.duration, ((last + 1) * frame) / buffer.sampleRate + EXAM_KEEP_AFTER),
+  };
+}
+
+// Resolves to {buffer, start, end} or null (missing file, file:// page, decode error). Cached per file.
+function loadExamClip(src) {
+  const ctx = examAudioContext();
+  if (!ctx) {
+    return Promise.resolve(null);
+  }
+  if (!examClipCache.has(src)) {
+    if (examClipCache.size >= EXAM_CLIP_CACHE_MAX) {
+      examClipCache.delete(examClipCache.keys().next().value);
+    }
+    const job = fetch(src)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return response.arrayBuffer();
+      })
+      .then((bytes) => new Promise((resolve, reject) => ctx.decodeAudioData(bytes, resolve, reject)))
+      .then((buffer) => ({ buffer, ...speechBounds(buffer) }))
+      .catch(() => null);
+    examClipCache.set(src, job);
+  }
+  return examClipCache.get(src);
+}
+
+// Lays decoded clips on one timeline: [{clip, at, offset, length, level}] plus the total length in seconds.
+function planClipTimeline(loaded, clips) {
+  const parts = [];
+  let at = 0;
+  loaded.forEach((clip, index) => {
+    if (index > 0) {
+      at += clips[index].wordStart === false ? EXAM_SYLLABLE_GAP : EXAM_WORD_GAP;
+    }
+    const length = clip.end - clip.start;
+    parts.push({ clip, at, offset: clip.start, length, level: clips[index].light ? 0.55 : 1 });
+    at += length;
+  });
+  return { parts, total: at };
+}
+
+function prefetchListening(lines) {
+  if (examVoices().any || !examAudioContext()) {
+    return;
+  }
+  lines.forEach((line) => wordClipsFor(splitSpeaker(line).text).forEach((clip) => loadExamClip(clip.src)));
+}
+
 function playClipList(clips, token, onDone) {
+  const ctx = examAudioContext();
+  if (!ctx || !clips.length) {
+    playClipElements(clips, token, onDone);
+    return;
+  }
+  const unlocked = ctx.state === "running"
+    ? Promise.resolve()
+    : Promise.race([ctx.resume().catch(() => {}), new Promise((resolve) => setTimeout(resolve, 800))]);
+  Promise.all([unlocked, ...clips.map((clip) => loadExamClip(clip.src))]).then(([, ...loaded]) => {
+    if (token !== examPlayToken) {
+      return;
+    }
+    if (ctx.state !== "running" || loaded.some((clip) => !clip)) {
+      playClipElements(clips, token, onDone);
+      return;
+    }
+    const { parts, total } = planClipTimeline(loaded, clips);
+    const begin = ctx.currentTime + 0.05;
+    const sources = [];
+    let finished = false;
+    const finish = () => {
+      if (finished) {
+        return;
+      }
+      finished = true;
+      if (token === examPlayToken) {
+        onDone();
+      }
+    };
+    for (const part of parts) {
+      const source = ctx.createBufferSource();
+      source.buffer = part.clip.buffer;
+      const gain = ctx.createGain();
+      const start = begin + part.at;
+      const fade = Math.min(EXAM_FADE, part.length / 4);
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(part.level, start + fade);
+      gain.gain.setValueAtTime(part.level, start + part.length - fade);
+      gain.gain.linearRampToValueAtTime(0, start + part.length);
+      source.connect(gain);
+      gain.connect(ctx.destination);
+      source.start(start, part.offset, part.length);
+      sources.push(source);
+    }
+    sources[sources.length - 1].onended = finish;
+    // safety net if onended never fires (tab suspended, old WebKit)
+    setTimeout(finish, (total + 1.5) * 1000);
+    // stopAudio() pauses everything in currentAudio; give it a handle that silences the whole line
+    currentAudio.push({
+      pause() {
+        finished = true;
+        sources.forEach((source) => {
+          try {
+            source.stop();
+          } catch (err) {
+            /* already stopped */
+          }
+        });
+      },
+    });
+  });
+}
+
+// Old path, kept for browsers without Web Audio or when files cannot be fetched (e.g. index.html opened as a file).
+function playClipElements(clips, token, onDone) {
   let index = 0;
   const next = () => {
     if (token !== examPlayToken) {
@@ -380,9 +579,9 @@ function playClipList(clips, token, onDone) {
 
 // Speaks lines like "男：……" with different voices; calls onDone when finished (unless cancelled).
 function speakExamLines(lines, level, token, onDone) {
-  const voices = examVoices();
   const rate = level <= 2 ? 0.82 : level <= 4 ? 0.9 : 0.98;
   let index = 0;
+  let voices = null;
   const next = () => {
     if (token !== examPlayToken) {
       return;
@@ -394,7 +593,7 @@ function speakExamLines(lines, level, token, onDone) {
     const { who, text } = splitSpeaker(lines[index]);
     index += 1;
     if (!voices.any) {
-      playClipList(wordClipsFor(text), token, () => setTimeout(next, 350));
+      playClipList(wordClipsFor(text), token, () => setTimeout(next, 450));
       return;
     }
     const utterance = new SpeechSynthesisUtterance(text);
@@ -411,7 +610,10 @@ function speakExamLines(lines, level, token, onDone) {
     utterance.onerror = () => setTimeout(next, 100);
     speechSynthesis.speak(utterance);
   };
-  next();
+  whenVoicesReady(() => {
+    voices = examVoices();
+    next();
+  });
 }
 
 function listeningScript(q) {
@@ -921,6 +1123,7 @@ function runExamSession() {
     }
     let round = 0;
     const lines = listeningScript(q);
+    prefetchListening(lines);
     const playRound = () => {
       if (token !== examPlayToken) {
         return;
